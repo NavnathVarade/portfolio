@@ -1,0 +1,62 @@
+.wrap {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  padding: 1rem 0;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+    will-change: transform;
+
+}
+
+.group {
+  display: flex;
+  gap: 2rem;
+}
+
+.track:hover {
+  animation-play-state: paused;
+}
+
+.item {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.sep {
+  color: var(--accent3);
+}
+
+/* 🔥 CRITICAL */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .track {
+    animation-duration: 20s;
+  }
+}
+
+
+
+
+
+
+

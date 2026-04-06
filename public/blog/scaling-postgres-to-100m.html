@@ -1,0 +1,65 @@
+<h1>Scaling PostgreSQL to 100M Requests/Day</h1>
+
+<p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2rem;">
+  March 12, 2025 &nbsp;·&nbsp; 8 min read
+</p>
+
+<p>
+  When we hit 50M daily requests at Vercel, our single primary PostgreSQL instance started showing the cracks. P99 query latency crept from 12ms to over 180ms on read-heavy endpoints. This is the story of how we scaled it — without rewriting the application.
+</p>
+
+<h2>The Problem</h2>
+
+<p>
+  Our bottleneck wasn't writes — it was reads. Analytics queries, dashboard aggregations, and search endpoints were all hammering the same primary. Connection count was also spiraling; at peak we held 2,400 open connections, well above the <strong>max_connections = 1000</strong> we'd set.
+</p>
+
+<h2>Step 1: PgBouncer for Connection Pooling</h2>
+
+<p>
+  The first win was deploying PgBouncer in <em>transaction mode</em> in front of every app instance. This collapsed 2,400 open connections down to ~80 server-side connections at peak.
+</p>
+
+<pre><code>[pgbouncer]
+pool_mode = transaction
+max_client_conn = 5000
+default_pool_size = 25
+server_idle_timeout = 60</code></pre>
+
+<p>
+  Transaction mode means a server connection is only held for the duration of a transaction — not for the lifetime of the client connection. For most stateless web apps, this is exactly what you want.
+</p>
+
+<h2>Step 2: Read Replicas + Application-Level Routing</h2>
+
+<p>
+  We provisioned two read replicas in the same region as the primary. The key insight: replicas only help if your application actually routes reads to them. We wrote a thin wrapper around our query client:
+</p>
+
+<pre><code>function getDb(intent = 'read') {
+  if (intent === 'write') return primaryPool;
+  return replicaPool[Math.floor(Math.random() * replicaPool.length)];
+}
+
+// Usage
+const result = await getDb('read').query(
+  'SELECT * FROM analytics WHERE date > $1', [yesterday]
+);</code></pre>
+
+<h2>Step 3: Aggressive Indexing</h2>
+
+<p>
+  We ran <code>pg_stat_statements</code> for a week and identified the 10 slowest queries. Six of them were missing composite indexes. Adding <code>CONCURRENTLY</code>-built indexes on hot columns brought those query times from 340ms down to sub-5ms.
+</p>
+
+<h2>Results</h2>
+
+<p>
+  After all three changes, P99 read latency dropped from 180ms to 8ms. We're now comfortably handling 100M+ requests/day with headroom to spare. The primary CPU sits at ~30% peak, down from 95%.
+</p>
+
+<hr />
+
+<p>
+  <em>Questions? Reach me at <a href="mailto:navnathvarade09@gmail.com">navnathvarade09@gmail.com</a> or on <a href="https://x.com/navnath_tw" target="_blank">Twitter</a>.</em>
+</p>

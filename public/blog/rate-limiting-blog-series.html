@@ -1,0 +1,1780 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     Rate Limiting Systems: From Basics to Planet-Scale
+     Portfolio Blog — Themed for Navnath's portfolio
+     CSS vars inherited from parent portfolio (globals.css)
+     Fonts: Syne (display), Instrument Serif (serif), DM Mono (mono)
+═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+/* ── Portfolio-native overrides for this post ── */
+.bl-meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent2);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.bl-meta-dot { color: var(--accent3); }
+
+/* ── Part nav ── */
+.bl-partnav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+.bl-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bl-pill:hover { color: var(--text2); border-color: var(--accent3); background: var(--accent-glow); }
+.bl-pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+/* ── Parts visibility ── */
+.bl-part { display: none; }
+.bl-part.visible { display: block; }
+
+/* ── Cover ── */
+.bl-cover {
+  padding: 3rem 0 4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+  position: relative;
+}
+.bl-series-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.bl-series-tag::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent2);
+}
+.bl-cover-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  margin-bottom: 1.25rem;
+}
+.bl-cover-title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+.bl-cover-sub {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: var(--text2);
+  max-width: 580px;
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+.bl-author-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+.bl-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent3), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.85rem; font-weight: 800; color: var(--bg);
+  flex-shrink: 0;
+  border: 1px solid var(--border2);
+}
+.bl-author-name {
+  font-family: var(--font-display);
+  font-size: 0.9rem; font-weight: 700;
+  color: var(--text);
+}
+.bl-author-desc {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; color: var(--text3);
+  letter-spacing: 0.05em;
+  margin-top: 0.15rem;
+}
+.bl-stats {
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.7rem; color: var(--text3);
+  letter-spacing: 0.08em;
+}
+.bl-stats-dot { color: var(--accent2); }
+
+/* ── Part header ── */
+.bl-part-header {
+  padding: 2.5rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+.bl-part-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+.badge-1 { background: rgba(232,213,163,0.12); color: var(--accent2); border: 1px solid var(--accent3); }
+.badge-2 { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+.badge-3 { background: rgba(192,132,252,0.1); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); }
+
+.bl-part-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+.bl-part-intro {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text2);
+  line-height: 1.72;
+  font-weight: 300;
+  max-width: 640px;
+}
+
+/* ── Lead paragraph ── */
+.bl-lead {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.72;
+  color: var(--text);
+  margin-bottom: 2rem;
+  border-left: 2px solid var(--accent3);
+  padding-left: 1.5rem;
+}
+
+/* ── Typography ── */
+.bl-body h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 3.5rem 0 0.875rem;
+  color: var(--text);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.bl-body h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2.5rem 0 0.6rem;
+  color: var(--text);
+}
+.bl-body h4 {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 2rem 0 0.5rem;
+  color: var(--accent2);
+}
+.bl-body p {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--text2);
+  margin-bottom: 1.25rem;
+}
+.bl-body p:last-child { margin-bottom: 0; }
+.bl-body p strong { color: var(--text); font-weight: 500; }
+.bl-body p em { color: var(--accent); font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+
+/* ── Lists ── */
+.bl-body ul, .bl-body ol {
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+}
+.bl-body li {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.75;
+  color: var(--text2);
+  margin-bottom: 0.5rem;
+}
+.bl-body li strong { color: var(--text); font-weight: 500; }
+
+/* ── Code ── */
+.bl-body code {
+  font-family: var(--font-mono);
+  font-size: 0.83em;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  color: var(--accent2);
+}
+.bl-body pre {
+  background: #0d0d0d;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.75rem 0;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] .bl-body pre { background: #1a1a1a; }
+.bl-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.82rem;
+  line-height: 1.72;
+  color: #d4d4d4;
+}
+.code-lang {
+  position: absolute;
+  top: 0.6rem; right: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Syntax tokens */
+.kw { color: #569cd6; }
+.fn { color: #dcdcaa; }
+.st { color: #ce9178; }
+.cm { color: #6a9955; font-style: italic; }
+.nm { color: #b5cea8; }
+
+/* ── Callout boxes ── */
+.callout {
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+  border-left: 3px solid;
+}
+.callout-insight { background: rgba(232,213,163,0.07); border-color: var(--accent2); }
+.callout-warning  { background: rgba(248,113,113,0.07); border-color: #f87171; }
+.callout-tip      { background: rgba(74,222,128,0.07);  border-color: var(--green); }
+.callout-info     { background: rgba(96,165,250,0.07);  border-color: #60a5fa; }
+.callout-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.callout-insight .callout-label { color: var(--accent2); }
+.callout-warning  .callout-label { color: #f87171; }
+.callout-tip      .callout-label { color: var(--green); }
+.callout-info     .callout-label { color: #60a5fa; }
+.callout p {
+  font-family: var(--font-mono);
+  font-size: 0.88rem; font-weight: 300;
+  line-height: 1.72;
+  color: var(--text2);
+  margin-bottom: 0;
+}
+.callout p strong { color: var(--text); }
+
+/* ── Pull quote ── */
+.pullquote {
+  border-left: 2px solid var(--accent);
+  margin: 2.5rem 0;
+  padding: 0.25rem 0 0.25rem 1.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* ── Divider ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0;
+  color: var(--text3);
+  font-size: 1rem;
+  letter-spacing: 0.3em;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── TOC ── */
+.bl-toc {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem 1.75rem;
+  margin: 2rem 0;
+}
+.bl-toc-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1rem;
+}
+.bl-toc-part {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent3);
+  margin: 1rem 0 0.5rem;
+}
+.bl-toc-part:first-of-type { margin-top: 0; }
+.bl-toc ul { list-style: none; padding: 0; margin: 0; }
+.bl-toc li { margin-bottom: 0.35rem; }
+.bl-toc a {
+  font-family: var(--font-mono);
+  font-size: 0.82rem; font-weight: 300;
+  color: var(--accent2);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.bl-toc a:hover { color: var(--accent); }
+
+/* ── Tags ── */
+.bl-tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; }
+.bl-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent2);
+  background: var(--accent-glow);
+  border: 1px solid rgba(232,213,163,0.18);
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+}
+
+/* ── Company card ── */
+.company-card {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 1.5rem 1.75rem;
+  margin: 1.75rem 0;
+  transition: border-color 0.2s;
+}
+.company-card:hover { border-color: var(--accent3); }
+.company-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.company-logo {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.85rem; font-weight: 800;
+  flex-shrink: 0;
+}
+.logo-stripe  { background: #635bff; color: white; }
+.logo-twitter { background: #000; color: white; border: 1px solid #333; }
+.logo-cf      { background: #f6821f; color: white; }
+.logo-google  { background: #4285f4; color: white; }
+.company-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.company-tagline { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text3); margin-top: 0.15rem; letter-spacing: 0.05em; }
+.company-card p { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 300; line-height: 1.75; color: var(--text2); margin-bottom: 0; }
+
+/* ── Algo comparison table ── */
+.compare-table {
+  width: 100%; border-collapse: collapse;
+  margin: 1.75rem 0; font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+.compare-table th {
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  text-align: left; font-weight: 600;
+  font-size: 0.72rem; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border2);
+}
+.compare-table th:first-child { border-radius: 6px 0 0 0; }
+.compare-table th:last-child  { border-radius: 0 6px 0 0; }
+.compare-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text2);
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+.compare-table td:first-child { color: var(--text); font-weight: 500; }
+.compare-table code { font-size: 0.8em; }
+
+/* ── Chip rows ── */
+.chip-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; }
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem; font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+}
+.chip-pro { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.chip-con { background: rgba(248,113,113,0.1); color: #f87171;  border: 1px solid rgba(248,113,113,0.2); }
+
+/* ── Flow/ASCII diagrams ── */
+.flow-diagram {
+  font-family: var(--font-mono);
+  font-size: 0.78rem; line-height: 1.65;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text2);
+  margin: 1.5rem 0;
+}
+.diagram-caption {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; color: var(--text3);
+  text-align: center; margin-top: 0.75rem;
+  font-style: italic; letter-spacing: 0.03em;
+}
+
+/* ── Timeline ── */
+.timeline { margin: 2rem 0; }
+.timeline-step { display: flex; gap: 1.25rem; margin-bottom: 1.75rem; align-items: flex-start; }
+.timeline-dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0; margin-top: 2px;
+  border: 1px solid;
+}
+.dot-orange { background: rgba(232,213,163,0.1); color: var(--accent2); border-color: var(--accent3); }
+.dot-blue   { background: rgba(96,165,250,0.1);  color: #60a5fa; border-color: rgba(96,165,250,0.3); }
+.dot-purple { background: rgba(192,132,252,0.1); color: #c084fc; border-color: rgba(192,132,252,0.3); }
+.dot-green  { background: rgba(74,222,128,0.1);  color: var(--green); border-color: rgba(74,222,128,0.3); }
+.timeline-label { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--text); }
+.timeline-text  { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 300; color: var(--text2); line-height: 1.7; }
+
+/* ── Takeaway grid ── */
+.takeaway-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem; margin: 2rem 0;
+}
+@media (max-width: 600px) { .takeaway-grid { grid-template-columns: 1fr; } }
+.takeaway-card {
+  border-radius: 8px; padding: 1.25rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.takeaway-card:hover { border-color: var(--accent3); }
+.takeaway-num {
+  font-family: var(--font-display);
+  font-size: 2.5rem; font-weight: 800;
+  color: var(--border2); line-height: 1; margin-bottom: 0.65rem;
+  letter-spacing: -0.04em;
+}
+.takeaway-text {
+  font-family: var(--font-mono);
+  font-size: 0.83rem; line-height: 1.65; color: var(--text2); font-weight: 300;
+}
+.takeaway-text strong { color: var(--text); font-weight: 500; }
+
+/* ── Interactive demos ── */
+.demo-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden; margin: 2rem 0;
+}
+.demo-header {
+  background: var(--surface);
+  padding: 0.875rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.demo-header-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--text2); letter-spacing: 0.08em;
+}
+.demo-dots { display: flex; gap: 5px; }
+.demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+.demo-body { padding: 1.5rem; }
+.demo-controls { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.demo-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  border-radius: 4px; border: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: var(--bg); }
+.btn-primary:hover { background: var(--accent2); }
+.btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+.btn-secondary:hover { background: var(--surface); color: var(--text); }
+.demo-output {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem; line-height: 1.75;
+  min-height: 80px; color: var(--text2);
+}
+.log-ok      { color: var(--green); }
+.log-blocked { color: #f87171; }
+.log-info    { color: #60a5fa; }
+.slider-row { display: flex; align-items: center; gap: 0.875rem; margin-bottom: 0.875rem; }
+.slider-label { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text2); min-width: 140px; }
+.slider-val   { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; color: var(--accent2); min-width: 36px; }
+input[type=range] { flex: 1; accent-color: var(--accent2); }
+
+/* ── Token Bucket viz ── */
+.bucket-viz { display: flex; gap: 2rem; align-items: flex-end; padding: 1rem 0; flex-wrap: wrap; }
+.bucket-container { text-align: center; }
+.bucket-label { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; color: var(--text3); margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+.bucket-outer {
+  width: 70px; height: 110px;
+  border: 1.5px solid var(--border2);
+  border-radius: 0 0 6px 6px; border-top: none;
+  margin: 0 auto; position: relative; overflow: hidden;
+  background: var(--bg3);
+}
+.bucket-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, var(--accent2) 0%, var(--accent3) 100%);
+  transition: height 0.4s ease;
+  border-radius: 0 0 4px 4px;
+}
+.bucket-tokens { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; margin-top: 0.4rem; color: var(--text3); }
+
+/* ── CTA section ── */
+.bl-cta {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  margin: 3rem 0 2rem;
+}
+.bl-cta-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin-bottom: 0.6rem; }
+.bl-cta-sub { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 300; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.65; }
+.bl-cta-btn {
+  display: inline-block;
+  background: var(--accent); color: var(--bg);
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.75rem 1.75rem;
+  border-radius: 6px;
+  border: none; cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.bl-cta-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+
+/* ── Footer ── */
+.bl-post-footer {
+  text-align: center;
+  padding: 2.5rem 0 1rem;
+  border-top: 1px solid var(--border);
+  margin-top: 3rem;
+}
+.bl-post-footer p { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text3); font-weight: 300; }
+.bl-post-footer a { color: var(--accent2); text-decoration: underline; text-underline-offset: 3px; }
+.bl-post-footer a:hover { color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .bl-cover-title { font-size: 2.2rem; }
+  .bl-part-title  { font-size: 1.6rem; }
+  .compare-table  { font-size: 0.75rem; }
+  .compare-table td, .compare-table th { padding: 0.5rem 0.65rem; }
+  .bl-partnav { gap: 0.35rem; }
+  .bl-pill { font-size: 0.65rem; padding: 0.35rem 0.75rem; }
+}
+</style>
+
+<!-- ═══════════════════════ PART NAV ═══════════════════════════ -->
+<div class="bl-partnav">
+  <button class="bl-pill active"  data-bl-part="0">Cover</button>
+  <button class="bl-pill"  data-bl-part="1">Part I — Fundamentals</button>
+  <button class="bl-pill"  data-bl-part="2">Part II — System Design</button>
+  <button class="bl-pill"  data-bl-part="3">Part III — Advanced</button>
+</div>
+
+<!-- ════════════════════════ COVER ═════════════════════════════ -->
+<div class="bl-part visible" id="bl-part-0">
+
+<div class="bl-cover">
+  <div class="bl-series-tag">⬡ 3-Part Engineering Deep Dive</div>
+  <h1 class="bl-cover-title">
+    Rate Limiting Systems:<br>
+    <em>From Basics to Planet-Scale</em>
+  </h1>
+  <p class="bl-cover-sub">
+    Everything you need to design, implement, and scale rate limiting —
+    from a single server to Cloudflare's 100-city global network.
+  </p>
+  <div class="bl-author-row">
+    <div class="bl-avatar">PE</div>
+    <div>
+      <div class="bl-author-name">Principal Engineers Collective</div>
+      <div class="bl-author-desc">Google · Amazon · Meta · Cloudflare</div>
+    </div>
+  </div>
+  <div class="bl-stats">
+    <span><span class="bl-stats-dot">·</span> ~45 min read</span>
+    <span><span class="bl-stats-dot">·</span> 3 parts</span>
+    <span><span class="bl-stats-dot">·</span> Interview-ready</span>
+    <span><span class="bl-stats-dot">·</span> Production insights</span>
+  </div>
+</div>
+
+<div class="bl-body">
+  <div class="bl-toc">
+    <div class="bl-toc-title">Table of Contents</div>
+    <div class="bl-toc-part">Part I — Fundamentals &amp; Algorithms</div>
+    <ul>
+      <li><a href="#"  data-bl-part="1">Why rate limiting is the unsung hero of backend systems</a></li>
+      <li><a href="#"  data-bl-part="1">Real-world examples: Twitter, Stripe, Google</a></li>
+      <li><a href="#"  data-bl-part="1">The four core algorithms explained visually</a></li>
+      <li><a href="#"  data-bl-part="1">Interactive algorithm simulator</a></li>
+    </ul>
+    <div class="bl-toc-part">Part II — System Design &amp; Scaling</div>
+    <ul>
+      <li><a href="#"  data-bl-part="2">Single-server → distributed Redis → planet-scale</a></li>
+      <li><a href="#"  data-bl-part="2">The CAP theorem of rate limiting</a></li>
+      <li><a href="#"  data-bl-part="2">Race conditions, hot keys &amp; clock drift</a></li>
+      <li><a href="#"  data-bl-part="2">Architecture patterns with code</a></li>
+    </ul>
+    <div class="bl-toc-part">Part III — Advanced Topics &amp; Case Studies</div>
+    <ul>
+      <li><a href="#"  data-bl-part="3">Cloudflare, Stripe, and Twitter war stories</a></li>
+      <li><a href="#"  data-bl-part="3">Adaptive &amp; ML-powered rate limiting</a></li>
+      <li><a href="#"  data-bl-part="3">Key takeaways for system design interviews</a></li>
+    </ul>
+  </div>
+
+  <div class="bl-tag-row">
+    <span class="bl-tag">System Design</span>
+    <span class="bl-tag">Distributed Systems</span>
+    <span class="bl-tag">Backend Engineering</span>
+    <span class="bl-tag">Redis</span>
+    <span class="bl-tag">API Design</span>
+    <span class="bl-tag">Cloudflare</span>
+    <span class="bl-tag">Interview Prep</span>
+  </div>
+</div>
+</div><!-- /cover -->
+
+
+<!-- ═══════════════════════ PART I ══════════════════════════════ -->
+<div class="bl-part" id="bl-part-1">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-1">Part I of III</span>
+  <h1 class="bl-part-title">Fundamentals &amp; Algorithms:<br>The Building Blocks</h1>
+  <p class="bl-part-intro">We start from scratch. What is rate limiting, why it matters more than you think, and how the four classic algorithms actually work — with visual intuition and real production context.</p>
+</div>
+
+<div class="bl-body">
+
+<p class="bl-lead">It's 3:47 AM. An alert fires. Your API is returning errors for every legitimate customer — but your servers are fine. The culprit? One single bad actor is hammering your endpoint with 10,000 requests per second.</p>
+
+<p>This scenario plays out at companies big and small every week. The fix — rate limiting — is one of the most impactful yet underappreciated systems in modern backend engineering.</p>
+
+<p>This series is the guide I wish I'd had when I first had to design rate limiting for a system handling 2 million API calls per day. By the end, you'll be able to design and explain rate limiting at Google-scale.</p>
+
+<h2>Why Rate Limiting Is The Unsung Hero</h2>
+
+<p>Let's put it plainly: <strong>without rate limiting, your API is an open invitation for abuse.</strong></p>
+
+<p>Think about what happens if you remove it entirely:</p>
+
+<ul>
+  <li>A scraper hits your product search 50,000 times in 10 minutes and steals your entire catalog</li>
+  <li>A DDoS attack floods your checkout endpoint, crashing it for paying customers</li>
+  <li>A misconfigured client enters an infinite retry loop and devours $40,000 of cloud compute</li>
+  <li>One power user consumes 90% of shared database connection pool, degrading service for everyone else</li>
+</ul>
+
+<p>Rate limiting is your system's immune system. It prevents abuse, ensures fair access, controls costs, and keeps your SLAs intact under load.</p>
+
+<div class="callout callout-insight">
+  <div class="callout-label">💡 Engineering Insight</div>
+  <p>At Stripe, rate limiting isn't just a security feature — it's a <strong>reliability guarantee</strong>. Their limits are carefully set so that even if every customer hits them simultaneously, the system degrades gracefully rather than completely. This is the philosophy shift: from "limits as restrictions" to "limits as guarantees."</p>
+</div>
+
+<h2>Real-World Examples</h2>
+
+<div class="company-card">
+  <div class="company-header">
+    <div class="company-logo logo-twitter">𝕏</div>
+    <div>
+      <div class="company-name">Twitter / X API</div>
+      <div class="company-tagline">Protecting the social graph at massive scale</div>
+    </div>
+  </div>
+  <p>Twitter's API uses a tiered rate limiting model based on authentication type. Free-tier apps get 500,000 tweet reads per month. Premium apps get up to 1 million. The limits exist because the Twitter firehose — all public tweets — is an extraordinary resource, and without limits, a handful of data brokers would consume all bandwidth. Each limit tier is priced to reflect actual infrastructure cost, creating a sustainable business model for a public API.</p>
+</div>
+
+<div class="company-card">
+  <div class="company-header">
+    <div class="company-logo logo-stripe">S</div>
+    <div>
+      <div class="company-name">Stripe Payments API</div>
+      <div class="company-tagline">Rate limiting as a reliability contract</div>
+    </div>
+  </div>
+  <p>Stripe allows up to 100 read requests per second and 100 write requests per second per secret key, in test mode. In live mode these scale up significantly. Their rate limiting is specifically designed to protect against a class of bugs where a developer accidentally writes a tight loop that calls the Charges API. Without this, one engineer's mistake could drain a production account of thousands of dollars in minutes. Stripe's limits are a safety net as much as a business control.</p>
+</div>
+
+<div class="company-card">
+  <div class="company-header">
+    <div class="company-logo logo-google">G</div>
+    <div>
+      <div class="company-name">Google APIs (Maps, Gmail, etc.)</div>
+      <div class="company-tagline">Quota-based rate limiting at petabyte scale</div>
+    </div>
+  </div>
+  <p>Google's approach is fascinating because they separate <em>rate limits</em> (requests per second) from <em>quotas</em> (requests per day). Google Maps charges per-request beyond a free monthly allowance. Their rate limits prevent burst abuse, while quotas enforce monthly caps that translate directly to billing. This dual system lets Google both protect infrastructure in real-time and monetize fairly over longer time horizons.</p>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Core Problems Rate Limiting Solves</h2>
+
+<h3>1. DDoS and Abuse Protection</h3>
+<p>A Distributed Denial of Service attack works by overwhelming your system with requests. Rate limiting is your first line of defense. By capping requests per IP or API key, you can prevent any single source from consuming more than their fair share of capacity.</p>
+
+<h3>2. Cost Control</h3>
+<p>Modern APIs often sit in front of expensive resources: database queries, ML inference, third-party API calls. Without limits, a single misbehaving client can rack up enormous compute costs. At AWS scale, this can be the difference between a $50,000 cloud bill and a $5 million one.</p>
+
+<h3>3. Fair Resource Allocation</h3>
+<p>Without limits, the noisiest clients crowd out everyone else. Rate limiting ensures that one customer's spike doesn't degrade the experience for your other 10,000 customers. This is the principle of <em>fair queuing</em> from networking — applied to API access.</p>
+
+<h3>4. SLA Protection</h3>
+<p>Every enterprise SLA you sign is an implicit promise about availability and latency. Rate limiting is the mechanism that makes those promises keepable. When you commit to 99.9% uptime, you're also implicitly committing to shed excess load before it cascades into an outage.</p>
+
+<div class="divider">· · ·</div>
+
+<h2>The Four Core Algorithms</h2>
+
+<h3>Algorithm 1: Fixed Window Counter</h3>
+
+<p><strong>The Intuition:</strong> Divide time into fixed windows (e.g., 1-minute buckets). Count requests per window. If a client exceeds the limit within a window, reject them until the next window starts.</p>
+
+<div class="flow-diagram">  Time:  |-- Window 1 --|-- Window 2 --|-- Window 3 --|
+         00:00     01:00     02:00     03:00
+
+  Client A: ████████░░  (8/10 req) ██████████ (10/10 req - at limit) ████░░░░░░ (4/10)
+  Client B: ██░░░░░░░░  (2/10 req) ░░░░░░░░░░ (0/10 req)            ██████░░░░ (6/10)
+
+  ⚠ The boundary attack: A client can make 10 requests at 00:59 and
+    10 more at 01:01 — 20 requests in 2 seconds while "obeying limits"</div>
+
+<pre><code class="language-python"><span class="cm"># Fixed Window Counter — Simple, but has boundary vulnerability</span>
+<span class="kw">def</span> <span class="fn">is_allowed_fixed_window</span>(user_id: str, limit: int, window_seconds: int) -> bool:
+    now = int(time.time())
+    window_key = now // window_seconds  <span class="cm"># e.g., minute bucket</span>
+    key = <span class="st">f"rl:fixed:{user_id}:{window_key}"</span>
+
+    count = redis.<span class="fn">incr</span>(key)
+    <span class="kw">if</span> count == <span class="nm">1</span>:
+        redis.<span class="fn">expire</span>(key, window_seconds)
+
+    <span class="kw">return</span> count <= limit</code></pre>
+<div class="code-lang">Python</div>
+
+<div class="chip-row">
+  <span class="chip chip-pro">✓ O(1) memory per user</span>
+  <span class="chip chip-pro">✓ Trivially simple to implement</span>
+  <span class="chip chip-con">✗ Window boundary attack allows 2× burst</span>
+  <span class="chip chip-con">✗ Uneven traffic distribution within window</span>
+</div>
+
+<p><strong>Use when:</strong> Internal rate limiting where the boundary attack is acceptable (e.g., internal microservice limits). Never use for public-facing APIs where clients might exploit the boundary.</p>
+
+<div class="divider">· · ·</div>
+
+<h3>Algorithm 2: Sliding Window Log</h3>
+
+<p><strong>The Intuition:</strong> Keep a timestamp log of every request. When a new request arrives, count how many timestamps fall within the last N seconds. If over the limit, reject. Expire old timestamps.</p>
+
+<pre><code class="language-python"><span class="cm"># Sliding Window Log — Perfect accuracy, higher memory</span>
+<span class="kw">def</span> <span class="fn">is_allowed_sliding_log</span>(user_id: str, limit: int, window_seconds: int) -> bool:
+    now = time.time()
+    window_start = now - window_seconds
+    key = <span class="st">f"rl:log:{user_id}"</span>
+
+    pipeline = redis.<span class="fn">pipeline</span>()
+    pipeline.<span class="fn">zremrangebyscore</span>(key, <span class="nm">0</span>, window_start)  <span class="cm"># remove old</span>
+    pipeline.<span class="fn">zadd</span>(key, {str(now): now})              <span class="cm"># add current</span>
+    pipeline.<span class="fn">zcard</span>(key)                               <span class="cm"># count in window</span>
+    pipeline.<span class="fn">expire</span>(key, window_seconds)
+    results = pipeline.<span class="fn">execute</span>()
+
+    count = results[<span class="nm">2</span>]
+    <span class="kw">return</span> count <= limit</code></pre>
+<div class="code-lang">Python</div>
+
+<div class="chip-row">
+  <span class="chip chip-pro">✓ Perfect accuracy — no boundary attack</span>
+  <span class="chip chip-pro">✓ Always reflects exactly the last N seconds</span>
+  <span class="chip chip-con">✗ O(n) memory — stores every timestamp</span>
+  <span class="chip chip-con">✗ At 1000 req/min, stores 1000 timestamps per user</span>
+</div>
+
+<p><strong>Use when:</strong> You need absolute accuracy and memory cost is acceptable. Useful for billing-critical limits, compliance scenarios, or when exact fairness is required by SLA.</p>
+
+<div class="divider">· · ·</div>
+
+<h3>Algorithm 3: Sliding Window Counter</h3>
+
+<p><strong>The Intuition:</strong> The best of both worlds. Keep only two counters (current window and previous window). Estimate the sliding count by weighting the previous window's count by how much of it overlaps with the current sliding window.</p>
+
+<pre><code class="language-python"><span class="cm"># Sliding Window Counter — O(1) memory, ~99.9% accurate</span>
+<span class="kw">def</span> <span class="fn">is_allowed_sliding_counter</span>(user_id: str, limit: int, window_seconds: int) -> bool:
+    now = time.time()
+    current_window = int(now // window_seconds)
+    prev_window = current_window - <span class="nm">1</span>
+
+    <span class="cm"># Time elapsed in current window (0.0 to 1.0)</span>
+    elapsed_ratio = (now % window_seconds) / window_seconds
+
+    prev_key = <span class="st">f"rate:{user_id}:{prev_window}"</span>
+    curr_key = <span class="st">f"rate:{user_id}:{current_window}"</span>
+
+    prev_count = redis.<span class="fn">get</span>(prev_key) or <span class="nm">0</span>
+    curr_count = redis.<span class="fn">get</span>(curr_key) or <span class="nm">0</span>
+
+    <span class="cm"># Weight previous window by how much of it is still "in scope"</span>
+    estimated_count = (prev_count * (<span class="nm">1</span> - elapsed_ratio)) + curr_count
+
+    <span class="kw">if</span> estimated_count < limit:
+        redis.<span class="fn">incr</span>(curr_key)
+        redis.<span class="fn">expire</span>(curr_key, window_seconds * <span class="nm">2</span>)
+        <span class="kw">return</span> True
+    <span class="kw">return</span> False</code></pre>
+<div class="code-lang">Python</div>
+
+<div class="chip-row">
+  <span class="chip chip-pro">✓ O(1) memory — only 2 counters per user</span>
+  <span class="chip chip-pro">✓ Very accurate (~0.1% error vs log)</span>
+  <span class="chip chip-pro">✓ Fast and simple Redis ops</span>
+  <span class="chip chip-con">✗ Slightly approximate (uses estimation)</span>
+</div>
+
+<p><strong>Use when:</strong> This is the sweet spot for most production systems. It gives you near-perfect accuracy at a fraction of the memory cost of the log approach. This is what most large-scale APIs use in practice — including many services at Google and Amazon.</p>
+
+<div class="divider">· · ·</div>
+
+<h3>Algorithm 4: Token Bucket</h3>
+
+<p><strong>The Intuition:</strong> Imagine a bucket that holds tokens. Each request consumes one token. Tokens are added to the bucket at a steady rate. If the bucket is empty when a request arrives — reject it. If the bucket is full and new tokens arrive — overflow and discard them.</p>
+
+<p>This is the algorithm that <strong>best mirrors real human behavior</strong>. It naturally allows controlled bursts (when the bucket has saved up tokens) while enforcing a long-term average rate.</p>
+
+<!-- Interactive Token Bucket Demo -->
+<div class="demo-wrap">
+  <div class="demo-header">
+    <div class="demo-dots">
+      <div class="demo-dot" style="background:#ff5f57"></div>
+      <div class="demo-dot" style="background:#febc2e"></div>
+      <div class="demo-dot" style="background:#28c840"></div>
+    </div>
+    <div class="demo-header-title">Token Bucket — Live Simulator</div>
+    <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text3);letter-spacing:0.08em;">Interactive Demo</div>
+  </div>
+  <div class="demo-body">
+    <div class="slider-row">
+      <span class="slider-label">Bucket capacity:</span>
+      <input type="range" id="s-capacity" min="2" max="20" value="10">
+      <span class="slider-val" id="v-capacity">10</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Refill rate (tok/s):</span>
+      <input type="range" id="s-rate" min="1" max="10" value="2">
+      <span class="slider-val" id="v-rate">2</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+      <div>
+        <div class="bucket-label">Token Bucket</div>
+        <div class="bucket-outer">
+          <div class="bucket-fill" id="bucket-fill" style="height:100%;"></div>
+        </div>
+        <div class="bucket-tokens" id="bucket-tokens">10 / 10 tokens</div>
+      </div>
+      <div style="flex:1;min-width:180px;">
+        <div class="demo-controls">
+          <button class="demo-btn btn-primary"  data-demo-action="send">Send Request</button>
+          <button class="demo-btn btn-secondary"  data-demo-action="burst">Burst (5×)</button>
+          <button class="demo-btn btn-secondary"  data-demo-action="reset">Reset</button>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text3);font-weight:300;margin-top:0.5rem;">
+          Tokens refill automatically. Watch what happens during a burst.
+        </p>
+      </div>
+    </div>
+    <div class="demo-output" id="bucket-log">Click "Send Request" to start...</div>
+  </div>
+</div>
+
+<pre><code class="language-python"><span class="cm"># Token Bucket — Production Implementation</span>
+<span class="kw">class</span> <span class="fn">TokenBucket</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, capacity: int, refill_rate: float):
+        self.capacity = capacity       <span class="cm"># max tokens</span>
+        self.refill_rate = refill_rate <span class="cm"># tokens per second</span>
+        self.tokens = capacity         <span class="cm"># start full</span>
+        self.last_refill = time.time()
+
+    <span class="kw">def</span> <span class="fn">consume</span>(self, tokens: int = <span class="nm">1</span>) -> bool:
+        self._refill()
+        <span class="kw">if</span> self.tokens >= tokens:
+            self.tokens -= tokens
+            <span class="kw">return</span> True   <span class="cm"># request allowed</span>
+        <span class="kw">return</span> False      <span class="cm"># request rejected</span>
+
+    <span class="kw">def</span> <span class="fn">_refill</span>(self):
+        now = time.time()
+        elapsed = now - self.last_refill
+        added = elapsed * self.refill_rate
+        <span class="cm"># Cap at capacity — overflow tokens are discarded</span>
+        self.tokens = min(self.capacity, self.tokens + added)
+        self.last_refill = now
+
+<span class="cm"># Redis-backed version for distributed systems:</span>
+<span class="cm"># Store (tokens, last_refill_time) in Redis hash</span>
+<span class="cm"># Use Lua script for atomic check-and-decrement</span></code></pre>
+<div class="code-lang">Python</div>
+
+<div class="chip-row">
+  <span class="chip chip-pro">✓ Handles burst traffic naturally</span>
+  <span class="chip chip-pro">✓ Smooth, user-friendly behavior</span>
+  <span class="chip chip-pro">✓ Variable token cost per request</span>
+  <span class="chip chip-con">✗ Harder to implement atomically in distributed systems</span>
+  <span class="chip chip-con">✗ Burst can still exceed instantaneous rate</span>
+</div>
+
+<p><strong>Use when:</strong> You want to allow legitimate burst traffic while enforcing a long-term average. Excellent for CDNs, streaming APIs, and any application where users need occasional bursts (loading a webpage fires many parallel requests).</p>
+
+<h3>Algorithm 5: Leaky Bucket</h3>
+
+<p><strong>The Intuition:</strong> Like Token Bucket but inverted. Instead of tokens flowing in, requests flow <em>into</em> the bucket and leak out at a fixed rate. The bucket has a fixed capacity. If it's full when a new request arrives — reject it.</p>
+
+<div class="flow-diagram">  Incoming Requests          Leaky Bucket              Processed
+  ═════════════════          ═════════════             ═════════
+  ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼   ┌──────────────┐
+  (bursty, uneven)   │  [ req ]      │  ── 1 req/sec ──►  steady stream
+                     │  [ req ]      │
+                     │  [ req ]      │  ◄── overflow →  DROP ✗
+                     │  [ req ]      │
+                     └──────────────┘
+                       capacity = 4
+
+  Key difference vs Token Bucket:
+  Token Bucket → controls INPUT rate (allows bursts through)
+  Leaky Bucket → controls OUTPUT rate (smooths traffic downstream)</div>
+<div class="diagram-caption">Leaky Bucket ensures downstream services always receive traffic at a perfectly smooth, predictable rate.</div>
+
+<div class="chip-row">
+  <span class="chip chip-pro">✓ Perfectly smooth output — great for downstream services</span>
+  <span class="chip chip-pro">✓ Simple to understand and implement</span>
+  <span class="chip chip-con">✗ Burst traffic always dropped, not queued</span>
+  <span class="chip chip-con">✗ Can feel punishing for legitimate burst behavior</span>
+</div>
+
+<p><strong>Use when:</strong> You need to protect a downstream service from burst traffic — like a legacy database that can't handle spikes. Common in network equipment (hardware rate limiting), payment processors (protecting bank APIs), and anywhere <em>output smoothing</em> matters more than <em>burst accommodation</em>.</p>
+
+<h2>Algorithm Comparison</h2>
+
+<table class="compare-table">
+  <thead>
+    <tr>
+      <th>Algorithm</th><th>Memory</th><th>Accuracy</th><th>Burst Handling</th><th>Best For</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Fixed Window</td><td>O(1)</td><td>Low (boundary spike)</td><td>Poor</td><td>Simple internal limits</td></tr>
+    <tr><td>Sliding Window Log</td><td>O(n) — all timestamps</td><td>Perfect</td><td>Good</td><td>Strict API key limits</td></tr>
+    <tr><td>Sliding Window Counter</td><td>O(1)</td><td>~99.9%</td><td>Good</td><td>Most production APIs ✓</td></tr>
+    <tr><td>Token Bucket</td><td>O(1)</td><td>High</td><td>Excellent</td><td>CDN, user-facing APIs</td></tr>
+    <tr><td>Leaky Bucket</td><td>O(n) queue</td><td>High</td><td>Drops bursts</td><td>Protecting downstream</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-insight">
+  <div class="callout-label">💡 Principal Engineer's Tip</div>
+  <p>In practice, most large-scale systems use <strong>Token Bucket</strong> for user-facing APIs (friendly to burst behavior) and <strong>Sliding Window Counter</strong> for backend services (memory-efficient and accurate). You rarely need the log-based approach unless exact compliance is required by a contract or regulation.</p>
+</div>
+
+<div class="bl-cta">
+  <div class="bl-cta-title">Ready for Part II?</div>
+  <div class="bl-cta-sub">We've mastered the algorithms. Now it's time to tackle the real challenge: making rate limiting work across dozens of servers, multiple regions, and billions of requests per day.</div>
+  <button class="bl-cta-btn"  data-bl-part="2">Continue to Part II: System Design →</button>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-1 -->
+
+
+<!-- ═══════════════════════ PART II ══════════════════════════════ -->
+<div class="bl-part" id="bl-part-2">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-2">Part II of III</span>
+  <h1 class="bl-part-title">System Design &amp; Scaling:<br>From One Server to the World</h1>
+  <p class="bl-part-intro">Theory meets reality. We trace the evolution of a rate limiter from a single-process in-memory store to a multi-region distributed system — and every painful tradeoff in between.</p>
+</div>
+
+<div class="bl-body">
+
+<p class="bl-lead">Knowing the algorithms is the easy part. The hard part is answering: how do you run them when your "system" is 800 servers spread across 4 continents?</p>
+
+<h2>The Evolution of a Rate Limiter</h2>
+
+<p>Every production rate limiting system goes through roughly the same evolution. Let's trace that journey.</p>
+
+<div class="timeline">
+  <div class="timeline-step">
+    <div class="timeline-dot dot-orange">1</div>
+    <div class="timeline-body">
+      <div class="timeline-label">Single Server — In-Memory</div>
+      <div class="timeline-text">You start simple. A hash map in your process memory. 0ms latency, no network calls, trivially correct. Works great... until you add a second server. Now each server has its own counter and users can make 10× their limit by round-robining across your fleet. This is why you can't stop here.</div>
+    </div>
+  </div>
+  <div class="timeline-step">
+    <div class="timeline-dot dot-blue">2</div>
+    <div class="timeline-body">
+      <div class="timeline-label">Centralized Store — Redis</div>
+      <div class="timeline-text">All servers share one Redis instance. Atomic operations (INCR, Lua scripts) make counters correct across the fleet. Works for most companies — up to millions of requests per second. The catch: Redis becomes a single point of failure. What happens when it goes down? You have to decide: fail open (allow all traffic) or fail closed (block all traffic). Both are dangerous.</div>
+    </div>
+  </div>
+  <div class="timeline-step">
+    <div class="timeline-dot dot-purple">3</div>
+    <div class="timeline-body">
+      <div class="timeline-label">Redis Cluster — Horizontal Scaling</div>
+      <div class="timeline-text">Shard your rate limit keys across multiple Redis nodes. User A's counter lives on shard 1, User B's on shard 2. Eliminates the single point of failure and scales read/write throughput. New challenge: hot keys. If one user makes 99% of requests, one shard becomes a bottleneck. Requires careful key design and consistent hashing.</div>
+    </div>
+  </div>
+  <div class="timeline-step">
+    <div class="timeline-dot dot-green">4</div>
+    <div class="timeline-body">
+      <div class="timeline-label">Multi-Region — Distributed Consensus</div>
+      <div class="timeline-text">When your users span continents, a single Redis cluster in us-east-1 adds 200ms of latency for users in Tokyo. You need rate limiting at the edge — but now you have multiple authoritative sources of truth, and they disagree. Welcome to the hardest problem in distributed systems.</div>
+    </div>
+  </div>
+</div>
+
+<h2>The Redis Solution in Depth</h2>
+
+<p>For most companies (under ~100M DAU), Redis-based rate limiting is the right answer. Let's look at how production systems actually implement it.</p>
+
+<pre><code class="language-lua"><span class="cm">-- Atomic Sliding Window Counter in Lua (runs as single Redis op)</span>
+<span class="kw">local</span> key = KEYS[<span class="nm">1</span>]
+<span class="kw">local</span> now = tonumber(ARGV[<span class="nm">1</span>])       <span class="cm">-- current timestamp in ms</span>
+<span class="kw">local</span> window = tonumber(ARGV[<span class="nm">2</span>])    <span class="cm">-- window size in ms</span>
+<span class="kw">local</span> limit = tonumber(ARGV[<span class="nm">3</span>])     <span class="cm">-- max requests</span>
+
+<span class="kw">local</span> window_start = now - window
+
+<span class="cm">-- Remove expired entries from sorted set</span>
+redis.<span class="fn">call</span>(<span class="st">'ZREMRANGEBYSCORE'</span>, key, <span class="nm">0</span>, window_start)
+
+<span class="cm">-- Count current requests in window</span>
+<span class="kw">local</span> count = redis.<span class="fn">call</span>(<span class="st">'ZCARD'</span>, key)
+
+<span class="kw">if</span> count < limit <span class="kw">then</span>
+    redis.<span class="fn">call</span>(<span class="st">'ZADD'</span>, key, now, now .. <span class="st">"-"</span> .. math.random(<span class="nm">1000000</span>))
+    redis.<span class="fn">call</span>(<span class="st">'PEXPIRE'</span>, key, window)
+    <span class="kw">return</span> {<span class="nm">1</span>, limit - count - <span class="nm">1</span>}  <span class="cm">-- allowed, remaining</span>
+<span class="kw">else</span>
+    <span class="kw">return</span> {<span class="nm">0</span>, <span class="nm">0</span>}  <span class="cm">-- blocked, 0 remaining</span>
+<span class="kw">end</span></code></pre>
+<div class="code-lang">Lua (Redis Script)</div>
+
+<div class="callout callout-info">
+  <div class="callout-label">🔹 Why Lua?</div>
+  <p>Redis executes Lua scripts atomically — no other commands can run between the ZREMRANGEBYSCORE and ZADD. This eliminates the race condition where two simultaneous requests both read "count = 9" against a limit of 10 and both get approved, giving you 11 requests instead of 10. Atomicity is non-negotiable for correct rate limiting.</p>
+</div>
+
+<h2>The CAP Theorem of Rate Limiting</h2>
+
+<p>Distributed rate limiting is fundamentally a consistency problem. You can pick two of three:</p>
+
+<ul>
+  <li><strong>Consistency:</strong> Every server agrees on the exact current count</li>
+  <li><strong>Availability:</strong> Rate limiting decisions are made without network round-trips</li>
+  <li><strong>Partition tolerance:</strong> System works even when Redis is unreachable</li>
+</ul>
+
+<p>Most systems choose <strong>Availability + Partition tolerance</strong>, accepting that limits are approximate. A 5% over-limit is vastly better than adding 50ms latency to every request, or failing open when Redis is down.</p>
+
+<div class="callout callout-warning">
+  <div class="callout-label">⚠ Classic Mistake</div>
+  <p>Engineers new to distributed rate limiting often design systems where <strong>Redis going down means all traffic is blocked</strong>. This is backwards. Your rate limiter should fail open with local fallback limits — not fail closed. A brief period of slightly elevated traffic is almost always better than taking your entire API offline.</p>
+</div>
+
+<h2>Race Conditions, Hot Keys, and Clock Drift</h2>
+
+<h3>Race Conditions</h3>
+<p>Without atomic operations, two simultaneous requests can both read the same counter value, both check "am I under the limit?", and both increment — resulting in over-counting. The fix is always atomicity: Redis Lua scripts, INCR with expiry, or Redis transactions (MULTI/EXEC).</p>
+
+<h3>Hot Keys</h3>
+<p>In a Redis Cluster, all keys for one user hash to one shard. A user making 50,000 requests/second creates a hot key that saturates a single Redis node. Mitigations: local caching (skip Redis for users clearly under limit), key sharding (split one user's counter across N shards and sum), or probabilistic counting (HyperLogLog for approximate counts).</p>
+
+<h3>Clock Drift</h3>
+<p>In distributed systems, server clocks can diverge by hundreds of milliseconds. For sliding window algorithms, this matters: a request that appears to be "1 minute ago" on Server A might appear to be "58 seconds ago" on Server B. Use NTP or PTP to keep clocks synchronized within 5ms, and design algorithms to tolerate small drift.</p>
+
+<h2>Architecture: Putting It Together</h2>
+
+<pre><code class="language-python"><span class="cm"># Production-grade rate limiter middleware (FastAPI example)</span>
+<span class="kw">from</span> functools <span class="kw">import</span> wraps
+<span class="kw">import</span> redis.asyncio <span class="kw">as</span> redis
+
+<span class="kw">class</span> <span class="fn">RateLimiter</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, redis_client, local_fallback=True):
+        self.redis = redis_client
+        self.local_cache = {}  <span class="cm"># in-memory fallback</span>
+        self.use_local = <span class="kw">not</span> local_fallback
+
+    <span class="kw">async def</span> <span class="fn">is_allowed</span>(self, key: str, limit: int, window: int) -> bool:
+        <span class="kw">try</span>:
+            <span class="kw">return await</span> self.<span class="fn">_redis_check</span>(key, limit, window)
+        <span class="kw">except</span> Exception:
+            <span class="cm"># Redis failure → fall back to local limits (fail open)</span>
+            <span class="kw">return</span> self.<span class="fn">_local_check</span>(key, limit * <span class="nm">2</span>, window)
+
+<span class="kw">def</span> <span class="fn">rate_limit</span>(requests_per_minute: int):
+    <span class="kw">def</span> <span class="fn">decorator</span>(func):
+        @<span class="fn">wraps</span>(func)
+        <span class="kw">async def</span> <span class="fn">wrapper</span>(request: Request, *args, **kwargs):
+            api_key = request.headers.get(<span class="st">"X-API-Key"</span>, request.client.host)
+            allowed = <span class="kw">await</span> limiter.<span class="fn">is_allowed</span>(
+                key=<span class="st">f"{func.__name__}:{api_key}"</span>,
+                limit=requests_per_minute,
+                window=<span class="nm">60</span>
+            )
+            <span class="kw">if not</span> allowed:
+                <span class="kw">raise</span> HTTPException(status_code=<span class="nm">429</span>, detail=<span class="st">"Rate limit exceeded"</span>)
+            <span class="kw">return await</span> <span class="fn">func</span>(request, *args, **kwargs)
+        <span class="kw">return</span> wrapper
+    <span class="kw">return</span> decorator
+
+<span class="cm"># Usage — different limits per endpoint:</span>
+@app.<span class="fn">get</span>(<span class="st">"/api/search"</span>)
+@<span class="fn">rate_limit</span>(<span class="nm">100</span>)   <span class="cm"># 100/min — read-heavy, less sensitive</span>
+<span class="kw">async def</span> <span class="fn">search</span>(q: str): ...
+
+@app.<span class="fn">post</span>(<span class="st">"/api/payments"</span>)
+@<span class="fn">rate_limit</span>(<span class="nm">10</span>)    <span class="cm"># 10/min — expensive + sensitive</span>
+<span class="kw">async def</span> <span class="fn">create_payment</span>(data: PaymentData): ...</code></pre>
+<div class="code-lang">Python</div>
+
+<h2>Response Headers: The User Experience of Rate Limiting</h2>
+
+<p>A rate limiter without helpful response headers is hostile to developers. The <em>de facto</em> standard headers are:</p>
+
+<table class="compare-table">
+  <thead>
+    <tr><th>Header</th><th>Example Value</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>X-RateLimit-Limit</code></td><td>1000</td><td>Maximum requests allowed in the window</td></tr>
+    <tr><td><code>X-RateLimit-Remaining</code></td><td>943</td><td>Requests remaining in current window</td></tr>
+    <tr><td><code>X-RateLimit-Reset</code></td><td>1703123456</td><td>Unix timestamp when the window resets</td></tr>
+    <tr><td><code>Retry-After</code></td><td>42</td><td>Seconds to wait before retrying (on 429)</td></tr>
+    <tr><td><code>X-RateLimit-Policy</code></td><td>1000;w=3600</td><td>IETF draft format: limit;window</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <div class="callout-label">✅ DX Best Practice</div>
+  <p>Include rate limit headers on <strong>every response</strong>, not just on 429s. Good API clients (like the Stripe SDK) use these headers to proactively back off before hitting limits. This dramatically reduces "wasted" 429 responses and makes your API a pleasure to work with.</p>
+</div>
+
+<h2>Performance Considerations</h2>
+
+<p>Rate limiting sits in the hot path of every request. Even a few milliseconds of overhead compounds dramatically at scale.</p>
+
+<ul>
+  <li><strong>Redis pipeline:</strong> Group multiple Redis commands into a single round-trip. Instead of ZREMRANGE + ZCARD + ZADD (3 network calls), use a Lua script or pipeline (1 network call).</li>
+  <li><strong>Connection pooling:</strong> Never create a new Redis connection per request. Maintain a pool of 10-50 connections. Connection overhead alone can add 10-50ms.</li>
+  <li><strong>Local caching:</strong> For read-heavy checks, cache the "definitely below limit" state locally for 100ms. A user who made 50 requests against a limit of 1000 is definitely allowed — you don't need Redis confirmation for a few hundred milliseconds.</li>
+  <li><strong>Async updates:</strong> After allowing a request, update the counter asynchronously. The response can be sent immediately; the Redis increment follows in a background task. Accept a tiny over-count for significant latency improvement.</li>
+</ul>
+
+<div class="bl-cta">
+  <div class="bl-cta-title">On to the Good Stuff</div>
+  <div class="bl-cta-sub">Part III brings real war stories from Cloudflare, Stripe, and Twitter — plus the cutting edge of adaptive and ML-driven rate limiting.</div>
+  <button class="bl-cta-btn"  data-bl-part="3">Continue to Part III: Advanced Topics →</button>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-2 -->
+
+
+<!-- ═══════════════════════ PART III ═════════════════════════════ -->
+<div class="bl-part" id="bl-part-3">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-3">Part III of III</span>
+  <h1 class="bl-part-title">Advanced Topics, Case Studies<br>&amp; The Future of Rate Limiting</h1>
+  <p class="bl-part-intro">The war stories, the cutting edge, and everything you need to ace your system design interview or architect production systems with confidence.</p>
+</div>
+
+<div class="bl-body">
+
+<p class="bl-lead">The best way to learn distributed systems isn't from textbooks — it's from war stories. Here are three systems at radically different scales, and the specific rate limiting decisions that define them.</p>
+
+<h2>Case Study 1: Cloudflare — Rate Limiting at the Edge</h2>
+
+<div class="company-card">
+  <div class="company-header">
+    <div class="company-logo logo-cf">CF</div>
+    <div>
+      <div class="company-name">Cloudflare</div>
+      <div class="company-tagline">~3.6 trillion DNS queries per day, 100+ cities, zero tolerance for latency</div>
+    </div>
+  </div>
+  <p>Cloudflare's rate limiting operates at a scale most people can barely conceptualize: they handle requests for millions of websites, processing over 55 million HTTP requests per second at peak. Adding a round-trip to a central Redis for every request is completely out of the question — that would add more latency than the entire rest of the request lifecycle.</p>
+</div>
+
+<p>Cloudflare's approach is built on two key insights:</p>
+
+<h3>Insight 1: Local-First Counting</h3>
+
+<p>Every Cloudflare data center (PoP) maintains counters locally in shared memory — not Redis, not a database. These counters are lightning-fast (nanosecond-level) and don't require any network calls. For most attacks, this is sufficient: an attacker sending a DDoS from a specific IP will likely be limited by the local PoP's counter long before they overflow any global limit.</p>
+
+<h3>Insight 2: Probabilistic Synchronization</h3>
+
+<p>When a local counter exceeds a threshold, the PoP broadcasts its count to neighboring PoPs. Not all PoPs — just a gossip-protocol-style subset. This creates eventual consistency that's good enough for rate limiting purposes. The key insight: for DDoS protection, being 95% accurate is vastly better than being 100% accurate but 200ms late.</p>
+
+<div class="flow-diagram">  CLOUDFLARE EDGE RATE LIMITING
+
+  Attacker                                          Legitimate User
+     │                                                    │
+     ▼                                                    ▼
+  ┌──────────────────────────────────────────────────────────┐
+  │                   Cloudflare PoP (Frankfurt)             │
+  │                                                          │
+  │   1. Request arrives                                     │
+  │   2. Check LOCAL shared memory counter (< 1ms)          │
+  │      ├── Under limit? → ALLOW (no network call)         │
+  │      └── Over local limit? → CHECK global estimate      │
+  │          ├── Clearly over? → BLOCK immediately          │
+  │          └── Borderline? → Sync with nearby PoPs        │
+  │                                                          │
+  │   Gossip sync every 100ms to: London, Paris, Amsterdam  │
+  └──────────────────────────────────────────────────────────┘</div>
+<div class="diagram-caption">Cloudflare's architecture: local-first decisions with gossip-based global coordination. 99%+ of requests never need network I/O for rate limiting.</div>
+
+<p>The result: Cloudflare's rate limiting adds less than 0.5 milliseconds of overhead to requests. At their scale, that difference represents millions of dollars of server capacity.</p>
+
+<div class="divider">· · ·</div>
+
+<h2>Case Study 2: Stripe — Reliability as a Feature</h2>
+
+<div class="company-card">
+  <div class="company-header">
+    <div class="company-logo logo-stripe">S</div>
+    <div>
+      <div class="company-name">Stripe</div>
+      <div class="company-tagline">Payments infrastructure — where rate limiting errors cost real money</div>
+    </div>
+  </div>
+  <p>Stripe's rate limiting philosophy is fundamentally different from a security product like Cloudflare. For Stripe, rate limits are a <em>reliability contract</em>. They want to prevent accidental abuse (developer bugs) more than malicious abuse (which is handled by fraud detection systems anyway).</p>
+</div>
+
+<h3>Stripe's Key Decisions</h3>
+
+<p><strong>1. Generous, business-tiered limits.</strong> Stripe sets limits based on what a legitimate business could ever need. A startup processing 100 payments per day doesn't need more than 100 API calls per second — if they're hitting that limit, something is wrong with their code. The limits are high enough to never affect normal usage, making them more like safety nets than guardrails.</p>
+
+<p><strong>2. Idempotency keys as rate-limit immune tokens.</strong> Stripe's idempotency key system lets clients safely retry requests. If you send the same idempotency key twice, Stripe returns the same result without counting it as a new request. This elegantly solves the "should retries count against limits?" problem — no, they shouldn't, and the idempotency system enforces that.</p>
+
+<p><strong>3. Different limits for different risk profiles.</strong> Creating a charge: limited. Reading a charge: generous. The limits reflect the actual downstream cost and risk of each operation, not just a blanket "X requests per minute."</p>
+
+<pre><code class="language-python"><span class="cm"># Stripe-style idempotent rate limiting</span>
+<span class="kw">def</span> <span class="fn">is_allowed</span>(api_key: str, endpoint: str,
+                idempotency_key: str = None,
+                limit_config: dict = None) -> bool:
+
+    <span class="cm"># Idempotency key provided → check if we've seen it</span>
+    <span class="kw">if</span> idempotency_key:
+        cache_key = <span class="st">f"idem:{api_key}:{idempotency_key}"</span>
+        <span class="kw">if</span> redis.exists(cache_key):
+            <span class="kw">return</span> True  <span class="cm"># retry, doesn't count against limit</span>
+
+    <span class="cm"># Normal rate limit check</span>
+    limit = limit_config.get(endpoint, DEFAULT_LIMIT)
+    allowed = sliding_window_check(<span class="st">f"rl:{api_key}:{endpoint}"</span>, limit)
+
+    <span class="kw">if</span> allowed <span class="kw">and</span> idempotency_key:
+        <span class="cm"># Cache the idempotency key for 24 hours</span>
+        redis.setex(<span class="st">f"idem:{api_key}:{idempotency_key}"</span>, <span class="nm">86400</span>, <span class="nm">1</span>)
+
+    <span class="kw">return</span> allowed</code></pre>
+<div class="code-lang">Python</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Case Study 3: Twitter/X — The Firehose Problem</h2>
+
+<div class="company-card">
+  <div class="company-header">
+    <div class="company-logo logo-twitter">𝕏</div>
+    <div>
+      <div class="company-name">Twitter / X</div>
+      <div class="company-tagline">Rate limiting a globally distributed social graph</div>
+    </div>
+  </div>
+  <p>Twitter's rate limiting story is a fascinating case of a system that evolved dramatically as the platform scaled from millions to hundreds of millions of users. The core challenge: how do you rate-limit access to a real-time social graph that spans the entire world, where any user can follow any other user?</p>
+</div>
+
+<h3>The 2022 API Restructure</h3>
+
+<p>When Elon Musk took over Twitter in 2022, one of the first major technical changes was dramatically tightening API rate limits. This revealed something fascinating: a huge portion of Twitter's infrastructure cost was being absorbed by third-party clients and bots making API calls. The restructure exposed the hidden economics of a social platform — the "free" API wasn't free at all.</p>
+
+<p>The technical lesson: <strong>rate limits must reflect economic reality.</strong> When API access is genuinely free and unlimited, the marginal cost of each additional API call is carried by the platform, not the requester. This is unsustainable. Rate limits are ultimately a mechanism for aligning the incentives of API users with the costs of the platform.</p>
+
+<h3>Timeline Rate Limiting Challenge</h3>
+
+<p>Twitter's home timeline is generated by fetching tweets from all accounts a user follows. For a user following 5,000 accounts, that's potentially thousands of database reads per timeline load. Rate limiting <em>timeline reads</em> requires not just counting requests, but understanding the cost of each request based on the follow graph complexity.</p>
+
+<pre><code class="language-python"><span class="cm"># Cost-based rate limiting (Twitter-inspired)</span>
+<span class="kw">def</span> <span class="fn">compute_request_cost</span>(user_id: str, endpoint: str) -> int:
+    <span class="kw">if</span> endpoint == <span class="st">"/timeline"</span>:
+        following_count = db.<span class="fn">get_following_count</span>(user_id)
+        <span class="cm"># Timeline cost scales with follow graph size</span>
+        <span class="kw">return</span> max(<span class="nm">1</span>, following_count // <span class="nm">100</span>)
+    <span class="kw">elif</span> endpoint == <span class="st">"/tweet"</span>:
+        <span class="kw">return</span> <span class="nm">1</span>  <span class="cm"># Fixed cost for simple writes</span>
+    <span class="kw">elif</span> endpoint == <span class="st">"/search"</span>:
+        <span class="kw">return</span> <span class="nm">5</span>  <span class="cm"># Search is expensive — index queries</span>
+    <span class="kw">return</span> <span class="nm">1</span>
+
+<span class="kw">def</span> <span class="fn">is_allowed</span>(user_id: str, endpoint: str) -> bool:
+    cost = <span class="fn">compute_request_cost</span>(user_id, endpoint)
+    <span class="cm"># Token bucket where each request consumes 'cost' tokens</span>
+    <span class="kw">return</span> token_bucket.<span class="fn">consume</span>(user_id, tokens=cost)</code></pre>
+<div class="code-lang">Python</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Advanced Concept: Adaptive Rate Limiting</h2>
+
+<p>Static rate limits are set at deploy time and changed manually. This creates a constant tension: too tight and you frustrate legitimate users; too loose and you fail to protect during attacks.</p>
+
+<p><strong>Adaptive rate limiting</strong> automatically adjusts limits based on real-time system health signals.</p>
+
+<div class="flow-diagram">  ADAPTIVE RATE LIMITING FEEDBACK LOOP
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │              System Health Monitor                          │
+  │                                                             │
+  │  DB latency p99 > 500ms? ──────────────────────────────┐   │
+  │  CPU usage > 85%?         ─────────────────────────┐   │   │
+  │  Error rate > 1%?          ────────────────────┐   │   │   │
+  └─────────────────────────────────────────────────│───│───│───┘
+                                                    │   │   │
+                                              Tighten limits automatically
+                                                    │   │   │
+  ┌─────────────────────────────────────────────────▼───▼───▼───┐
+  │                  Dynamic Limit Adjuster                     │
+  │                                                             │
+  │  Normal:    100 req/min                                     │
+  │  Stressed:   50 req/min  (health score 0.5)                 │
+  │  Critical:   20 req/min  (health score 0.2)                 │
+  │  Emergency:   5 req/min  (health score < 0.1)               │
+  └─────────────────────────────────────────────────────────────┘</div>
+<div class="diagram-caption">Adaptive rate limiting closes the feedback loop between system health and limits, automatically shedding load when the system is stressed.</div>
+
+<!-- Interactive Adaptive Demo -->
+<div class="demo-wrap">
+  <div class="demo-header">
+    <div class="demo-dots">
+      <div class="demo-dot" style="background:#ff5f57"></div>
+      <div class="demo-dot" style="background:#febc2e"></div>
+      <div class="demo-dot" style="background:#28c840"></div>
+    </div>
+    <div class="demo-header-title">Adaptive Rate Limiter — Health-Based Simulation</div>
+    <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text3);letter-spacing:0.08em;">Interactive Demo</div>
+  </div>
+  <div class="demo-body">
+    <div class="slider-row">
+      <span class="slider-label">System health:</span>
+      <input type="range" id="s-health" min="0" max="100" value="100" oninput="updateAdaptive()">
+      <span class="slider-val" id="v-health">100%</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Base limit (req/min):</span>
+      <input type="range" id="s-base" min="10" max="200" value="100" oninput="updateAdaptive()">
+      <span class="slider-val" id="v-base">100</span>
+    </div>
+    <div id="adaptive-output" style="margin-top:1rem;padding:1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-family:var(--font-mono);font-size:0.82rem;line-height:1.8;color:var(--text2);">
+      Adjust sliders to see adaptive limits in action...
+    </div>
+  </div>
+</div>
+
+<pre><code class="language-python"><span class="kw">class</span> <span class="fn">AdaptiveRateLimiter</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, base_limit: int):
+        self.base_limit = base_limit
+        self.health_monitor = HealthMonitor()
+
+    <span class="kw">def</span> <span class="fn">get_current_limit</span>(self) -> int:
+        health = self.health_monitor.<span class="fn">get_health_score</span>()
+        <span class="cm"># health is 0.0 (critical) to 1.0 (healthy)</span>
+        <span class="kw">if</span> health > <span class="nm">0.9</span>:
+            <span class="kw">return</span> self.base_limit
+        <span class="kw">elif</span> health > <span class="nm">0.7</span>:
+            <span class="kw">return</span> int(self.base_limit * <span class="nm">0.75</span>)
+        <span class="kw">elif</span> health > <span class="nm">0.5</span>:
+            <span class="kw">return</span> int(self.base_limit * <span class="nm">0.5</span>)
+        <span class="kw">elif</span> health > <span class="nm">0.3</span>:
+            <span class="kw">return</span> int(self.base_limit * <span class="nm">0.25</span>)
+        <span class="kw">else</span>:
+            <span class="kw">return</span> int(self.base_limit * <span class="nm">0.1</span>)
+
+<span class="kw">class</span> <span class="fn">HealthMonitor</span>:
+    <span class="kw">def</span> <span class="fn">get_health_score</span>(self) -> float:
+        db_score  = <span class="nm">1.0</span> - min(<span class="nm">1.0</span>, db_latency_p99 / <span class="nm">500</span>)
+        cpu_score = <span class="nm">1.0</span> - max(<span class="nm">0</span>, (cpu_pct - <span class="nm">70</span>) / <span class="nm">30</span>)
+        err_score = <span class="nm">1.0</span> - min(<span class="nm">1.0</span>, error_rate / <span class="nm">0.05</span>)
+        <span class="kw">return</span> min(db_score, cpu_score, err_score)  <span class="cm"># weakest link wins</span></code></pre>
+<div class="code-lang">Python</div>
+
+<h2>Advanced Concept: ML-Powered Anomaly Detection</h2>
+
+<p>Static rate limits work well for <em>volume</em> attacks. But sophisticated attackers operate <em>just under</em> your limits — 95 requests per minute on a 100 req/min limit, distributed across thousands of IPs. Traditional rate limiting is blind to this.</p>
+
+<p>Modern rate limiting systems augment traditional counters with behavioral analysis:</p>
+
+<ul>
+  <li><strong>Request pattern scoring:</strong> Is the request timing perfectly uniform (bot-like) or variable (human-like)?</li>
+  <li><strong>Endpoint correlation:</strong> Is this API key hitting only the "get user data" endpoint in rapid succession? Suspicious.</li>
+  <li><strong>Geographic consistency:</strong> A user who was in New York 5 minutes ago can't be in Singapore now.</li>
+  <li><strong>Device fingerprinting:</strong> Same API key, but the user-agent and TLS fingerprint changed every 10 requests?</li>
+</ul>
+
+<div class="callout callout-insight">
+  <div class="callout-label">💡 Production Reality</div>
+  <p>At Cloudflare, their Bot Management product scores every request with an ML model that runs in under 1ms, outputting a 0-99 bot score. This score can be used to dynamically rate-limit requests: a score of 90+ gets a 10× more aggressive limit. This is how you catch sophisticated bots that respect traditional rate limits.</p>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>The Key Takeaways</h2>
+
+<p>After everything we've covered, here are the principles that should guide every rate limiting decision you make:</p>
+
+<div class="takeaway-grid">
+  <div class="takeaway-card">
+    <div class="takeaway-num">01</div>
+    <div class="takeaway-text"><strong>Algorithm choice matters.</strong> Use Sliding Window Counter for most backends (memory-efficient, accurate). Use Token Bucket for user-facing APIs (friendly to burst behavior).</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">02</div>
+    <div class="takeaway-text"><strong>Atomicity is non-negotiable.</strong> All rate limit state mutations must be atomic. Race conditions in rate limiters are not theoretical — they happen in production under load.</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">03</div>
+    <div class="takeaway-text"><strong>Distributed systems = approximate limits.</strong> Accept that distributed rate limiting is eventually consistent. Design limits with a buffer. Don't fight the CAP theorem — work with it.</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">04</div>
+    <div class="takeaway-text"><strong>Fail open, not closed.</strong> When Redis goes down, apply local limits and stay open. A service that rejects all traffic during a cache failure is often worse than one that briefly over-serves.</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">05</div>
+    <div class="takeaway-text"><strong>Headers are part of the product.</strong> X-RateLimit-* headers transform limits from frustrations into features. Good API clients use these to self-throttle proactively.</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">06</div>
+    <div class="takeaway-text"><strong>Limits must reflect economic reality.</strong> Set limits high enough that legitimate users never hit them, and low enough that abuse is costly. Rate limits are a cost-allocation mechanism.</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">07</div>
+    <div class="takeaway-text"><strong>Edge is the future.</strong> For global systems, rate limiting at the edge (CDN/PoP level) beats centralized rate limiting in both latency and resilience. Don't round-trip to a central store if you can avoid it.</div>
+  </div>
+  <div class="takeaway-card">
+    <div class="takeaway-num">08</div>
+    <div class="takeaway-text"><strong>Adaptive beats static.</strong> As your system grows, static limits become increasingly wrong. Build health-aware rate limiters that automatically shed load when your downstream systems are stressed.</div>
+  </div>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>The System Design Interview Answer</h2>
+
+<p>When you're asked "Design a rate limiter" in a system design interview, here's the mental framework that demonstrates senior-level thinking:</p>
+
+<div class="callout callout-info">
+  <div class="callout-label">🎯 Interview Framework</div>
+  <p><strong>Step 1:</strong> Clarify scope. Per-user or per-IP? API key or session? What scale — 1M DAU or 1B? What consistency requirements?<br><br><strong>Step 2:</strong> Choose algorithm. Token Bucket for CDN-style, Sliding Window Counter for most APIs. Explain the tradeoffs you're making.<br><br><strong>Step 3:</strong> Choose storage. Single Redis for &lt; 100M scale. Redis Cluster with consistent hashing for larger. Multi-region local + gossip for planet scale.<br><br><strong>Step 4:</strong> Handle failures. Explain fail-open vs fail-closed vs local fallback. State your choice and why.<br><br><strong>Step 5:</strong> Think about edge cases. Hot keys, clock drift, window boundary attacks. Showing you know the pitfalls signals real production experience.</p>
+</div>
+
+<pre><code class="language-python"><span class="cm"># The "complete" rate limiter — production-grade implementation sketch</span>
+<span class="kw">class</span> <span class="fn">ProductionRateLimiter</span>:
+    <span class="st">"""
+    Sliding Window Counter with:
+    - Redis cluster backend
+    - Local fallback on Redis failure
+    - Adaptive limits based on system health
+    - Response header generation
+    - Comprehensive observability
+    """</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: RateLimitConfig):
+        self.redis_cluster = RedisCluster(config.redis_nodes)
+        self.local_cache = InMemoryLRUCache(max_size=<span class="nm">10000</span>)
+        self.health_monitor = HealthMonitor(config.thresholds)
+        self.metrics = MetricsClient()
+
+    <span class="kw">def</span> <span class="fn">check</span>(self, request: Request) -> RateLimitResult:
+        key = self.<span class="fn">_build_key</span>(request)
+        limit = self.<span class="fn">_get_adaptive_limit</span>(request)
+
+        <span class="kw">try</span>:
+            count, ttl = self.<span class="fn">_redis_sliding_window</span>(key, limit)
+            allowed = count <= limit
+            remaining = max(<span class="nm">0</span>, limit - count)
+
+            self.metrics.<span class="fn">increment</span>(
+                <span class="st">"rate_limit.check"</span>,
+                tags={<span class="st">"allowed"</span>: allowed, <span class="st">"endpoint"</span>: request.endpoint}
+            )
+
+            <span class="kw">return</span> RateLimitResult(
+                allowed=allowed,
+                remaining=remaining,
+                limit=limit,
+                reset_at=time.time() + ttl,
+                headers=self.<span class="fn">_build_headers</span>(limit, remaining, ttl)
+            )
+        <span class="kw">except</span> RedisException <span class="kw">as</span> e:
+            self.metrics.<span class="fn">increment</span>(<span class="st">"rate_limit.redis_failure"</span>)
+            <span class="kw">return</span> self.<span class="fn">_local_fallback</span>(key, limit * <span class="nm">2</span>)
+
+    <span class="kw">def</span> <span class="fn">_get_adaptive_limit</span>(self, request: Request) -> int:
+        base = self.config.<span class="fn">get_limit</span>(request.api_key, request.endpoint)
+        health = self.health_monitor.<span class="fn">score</span>()
+        <span class="kw">return</span> int(base * health)  <span class="cm"># scale limit with system health</span></code></pre>
+<div class="code-lang">Python</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Where Rate Limiting Is Headed</h2>
+
+<p>The field is evolving rapidly. Here's what senior engineers are paying attention to:</p>
+
+<ul>
+  <li><strong>WASM at the edge:</strong> Cloudflare Workers and Fastly Compute@Edge let you run custom rate limiting logic directly in edge PoPs, with zero cold-start latency. Rate limiting as a first-class edge primitive.</li>
+  <li><strong>eBPF in the kernel:</strong> Companies like Cloudflare are moving rate limiting into eBPF programs that run in the Linux kernel, below the network stack. This enables nanosecond-level packet dropping before any userspace code runs.</li>
+  <li><strong>Federated identity for rate limiting:</strong> As more services adopt OAuth 2.0 and OIDC, rate limits can be enforced at the identity provider level rather than per-service. One limit to rule them all.</li>
+  <li><strong>AI-driven anomaly detection:</strong> ML models scoring every request for bot likelihood, abuse patterns, and anomalous behavior — augmenting traditional counter-based limits with behavioral intelligence.</li>
+</ul>
+
+<div class="pullquote">
+  The future of rate limiting isn't faster counting — it's smarter understanding of what's normal and what isn't.
+</div>
+
+<h2>Final Thoughts</h2>
+
+<p>Rate limiting is one of those deceptively simple ideas that reveals infinite depth when you pull the thread. We've gone from a simple counter in a hash map all the way to machine learning models scoring billions of requests at the edge of the internet.</p>
+
+<p>What I hope you take away isn't just the technical details, but the <em>mindset</em>: rate limiting is a statement about the contract between your system and the world. Every limit you set is a choice about fairness, reliability, economics, and user experience.</p>
+
+<p>The next time you see a 429 response, think about the layers of engineering that decided whether to let your request through — and what algorithm, data structure, and distributed system was working in the milliseconds before that decision was made.</p>
+
+<div class="bl-cta">
+  <div class="bl-cta-title">You Made It. You're a Rate Limiting Expert. 🎉</div>
+  <div class="bl-cta-sub">If this series helped you think differently about distributed systems, share it with a colleague and follow for more deep dives into the infrastructure that powers the modern internet.</div>
+  <span class="bl-cta-btn" style="cursor:default;">Thanks for reading the full series ↑</span>
+</div>
+
+<div class="bl-tag-row">
+  <span class="bl-tag">System Design</span>
+  <span class="bl-tag">Rate Limiting</span>
+  <span class="bl-tag">Redis</span>
+  <span class="bl-tag">Distributed Systems</span>
+  <span class="bl-tag">API Engineering</span>
+  <span class="bl-tag">Cloudflare</span>
+  <span class="bl-tag">Backend</span>
+  <span class="bl-tag">Interview Prep</span>
+  <span class="bl-tag">Software Architecture</span>
+</div>
+
+<div class="bl-post-footer">
+  <p>Part of the <strong>Distributed Systems Deep Dive</strong> series</p>
+  <p style="margin-top:0.4rem;">Principal Engineers Collective · Google · Amazon · Meta · Cloudflare</p>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-3 -->
+
+
+<!-- ══════════════════════ SCRIPTS ═════════════════════════════ -->
+<script>
+/* ── Part switcher (namespaced to avoid conflicts) ── */
+window.blShowPart = function blShowPart(n) {
+  document.querySelectorAll('.bl-part').forEach((p, i) => {
+    p.classList.toggle('visible', i === n);
+  });
+  document.querySelectorAll('.bl-pill').forEach((p, i) => {
+    p.classList.toggle('active', i === n);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── Token Bucket Demo ── */
+let bucketTokens = 10, bucketCapacity = 10, refillRate = 2;
+let refillInterval, logLines = [];
+
+function updateBucketUI() {
+  const pct = (bucketTokens / bucketCapacity) * 100;
+  const fill = document.getElementById('bucket-fill');
+  const tok  = document.getElementById('bucket-tokens');
+  if (fill) fill.style.height = pct + '%';
+  if (tok)  tok.textContent = Math.floor(bucketTokens * 10) / 10 + ' / ' + bucketCapacity + ' tokens';
+}
+
+function addLog(msg, cls) {
+  const ts = new Date().toLocaleTimeString('en', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  logLines.unshift(`<span class="${cls}">[${ts}] ${msg}</span>`);
+  if (logLines.length > 8) logLines.pop();
+  const log = document.getElementById('bucket-log');
+  if (log) log.innerHTML = logLines.join('\n');
+}
+
+window.sendRequest = function sendRequest() {
+  if (bucketTokens >= 1) {
+    bucketTokens -= 1; updateBucketUI();
+    addLog('✓ Request ALLOWED — token consumed', 'log-ok');
+  } else {
+    addLog('✗ Request BLOCKED — bucket empty (429)', 'log-blocked');
+  }
+}
+
+window.burstRequests = function burstRequests() {
+  let i = 0;
+  const iv = setInterval(() => { sendRequest(); i++; if (i >= 5) clearInterval(iv); }, 120);
+}
+
+window.resetBucket = function resetBucket() {
+  bucketTokens = bucketCapacity; updateBucketUI();
+  logLines = [];
+  const log = document.getElementById('bucket-log');
+  if (log) log.innerHTML = 'Bucket reset. Ready.';
+}
+
+function startRefill() {
+  clearInterval(refillInterval);
+  refillInterval = setInterval(() => {
+    const sc = document.getElementById('s-capacity');
+    const sr = document.getElementById('s-rate');
+    if (sc) bucketCapacity = parseInt(sc.value);
+    if (sr) refillRate = parseInt(sr.value);
+    if (bucketTokens < bucketCapacity) {
+      bucketTokens = Math.min(bucketCapacity, bucketTokens + refillRate / 10);
+      updateBucketUI();
+    }
+  }, 100);
+}
+
+const sc = document.getElementById('s-capacity');
+const sr = document.getElementById('s-rate');
+if (sc) sc.addEventListener('input', function () {
+  bucketCapacity = parseInt(this.value);
+  const vc = document.getElementById('v-capacity');
+  if (vc) vc.textContent = this.value;
+  bucketTokens = Math.min(bucketTokens, bucketCapacity);
+  updateBucketUI();
+});
+if (sr) sr.addEventListener('input', function () {
+  refillRate = parseInt(this.value);
+  const vr = document.getElementById('v-rate');
+  if (vr) vr.textContent = this.value;
+});
+
+startRefill();
+updateBucketUI();
+
+/* ── Adaptive Demo ── */
+window.updateAdaptive = function updateAdaptive() {
+  const sh = document.getElementById('s-health');
+  const sb = document.getElementById('s-base');
+  if (!sh || !sb) return;
+  const health = parseInt(sh.value);
+  const base   = parseInt(sb.value);
+  const vh = document.getElementById('v-health');
+  const vb = document.getElementById('v-base');
+  if (vh) vh.textContent = health + '%';
+  if (vb) vb.textContent = base;
+
+  let status, color, multiplier, emoji;
+  if (health >= 90)      { status = 'Fully Healthy';    color = 'var(--green)'; multiplier = 1.0;  emoji = '🟢'; }
+  else if (health >= 70) { status = 'Slight Stress';    color = 'var(--accent2)'; multiplier = 0.75; emoji = '🟡'; }
+  else if (health >= 50) { status = 'Moderate Stress';  color = 'var(--accent)';  multiplier = 0.5;  emoji = '🟠'; }
+  else if (health >= 30) { status = 'High Stress';      color = '#f87171';        multiplier = 0.25; emoji = '🔴'; }
+  else                   { status = 'Critical';          color = '#ef4444';        multiplier = 0.1;  emoji = '🚨'; }
+
+  const effective = Math.round(base * multiplier);
+  const rejected  = base - effective;
+
+  const out = document.getElementById('adaptive-output');
+  if (out) out.innerHTML = `
+    <div style="margin-bottom:0.75rem">
+      <strong>${emoji} System Status: <span style="color:${color}">${status}</span></strong>
+      &nbsp;(Health: ${health}%)
+    </div>
+    <div>Base limit: <strong>${base} req/min</strong></div>
+    <div>Health multiplier: <strong>${(multiplier * 100).toFixed(0)}%</strong></div>
+    <div>Effective limit: <strong style="color:${color}">${effective} req/min</strong></div>
+    <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text3)">
+      ${rejected > 0
+        ? `Automatically rejecting ${rejected} req/min of capacity to protect the system`
+        : 'System at full capacity — all limits at maximum'}
+    </div>
+  `;
+}
+updateAdaptive();
+</script>

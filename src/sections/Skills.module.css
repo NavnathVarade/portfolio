@@ -1,0 +1,143 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 4rem;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: sticky;
+  top: 6rem;
+  height: fit-content;
+}
+
+.navBtn {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: transparent;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  cursor: none;
+  width: 100%;
+}
+
+.navBtnActive {
+  color: var(--accent);
+  background: rgba(232, 213, 163, 0.06);
+  border-color: var(--accent3);
+}
+
+.navBtn:hover:not(.navBtnActive) {
+  color: var(--text2);
+  background: var(--bg2);
+}
+
+.content {
+  min-height: 300px;
+}
+
+.category {
+  display: none;
+}
+
+.categoryActive {
+  display: block;
+}
+
+.categoryTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  padding: 1.25rem;
+  border-radius: var(--radius2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-glow), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.card:hover {
+  border-color: var(--accent3);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.cardName {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text2);
+  letter-spacing: 0.05em;
+}
+
+.levelBar {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.levelFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent3), var(--accent));
+  border-radius: 1px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    position: static;
+  }
+
+  .navBtn {
+    width: auto;
+  }
+}

@@ -1,0 +1,79 @@
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(var(--border), var(--border) 80%, transparent);
+}
+
+.item {
+  position: relative;
+  margin-bottom: 3.5rem;
+}
+
+.item:last-child {
+  margin-bottom: 0;
+}
+
+.dot {
+  position: absolute;
+  left: -2rem;
+  top: 0.25rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent3);
+  border: 2px solid var(--bg);
+  transform: translateX(-4px);
+  transition: all var(--transition-fast);
+}
+
+.item:hover .dot {
+  background: var(--accent);
+  transform: translateX(-4px) scale(1.3);
+}
+
+.date {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 0.5rem;
+}
+
+.role {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.company {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text2);
+  margin-bottom: 0.75rem;
+}
+
+.desc {
+  color: var(--text2);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  font-family: var(--font-mono);
+  font-weight: 300;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
