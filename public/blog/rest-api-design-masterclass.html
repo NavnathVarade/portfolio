@@ -1,0 +1,1204 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     REST API Design Masterclass — Portfolio Blog
+     Style: matches rate-limiting-blog-series.html exactly
+     Single-column reading layout, same CSS classes, same tokens
+═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+/* ─── Module nav pills ──────────────────────────────────────── */
+.bl-partnav {
+  display: flex; gap: 0.5rem; margin-bottom: 3rem; flex-wrap: wrap;
+}
+.bl-pill {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.4rem 1rem; border-radius: 20px;
+  border: 1px solid var(--border2); color: var(--text3);
+  background: transparent; cursor: pointer; transition: all 0.2s;
+}
+.bl-pill:hover { color: var(--text2); border-color: var(--accent3); background: var(--accent-glow); }
+.bl-pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.bl-part { display: none; }
+.bl-part.visible { display: block; }
+
+/* ─── Cover ─────────────────────────────────────────────────── */
+.bl-cover {
+  padding: 3rem 0 4rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem;
+}
+.bl-series-tag {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent2);
+  margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;
+}
+.bl-series-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--accent2); }
+.bl-cover-title {
+  font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800; line-height: 1.0; letter-spacing: -0.035em;
+  color: var(--text); margin-bottom: 1.25rem;
+}
+.bl-cover-title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--accent); }
+.bl-cover-sub {
+  font-family: var(--font-mono); font-size: 0.95rem; font-weight: 300;
+  color: var(--text2); max-width: 580px; line-height: 1.75; margin-bottom: 2rem;
+}
+.bl-author-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; }
+.bl-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent3), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 800;
+  color: var(--bg); flex-shrink: 0; border: 1px solid var(--border2);
+}
+.bl-author-name { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: var(--text); }
+.bl-author-desc { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text3); letter-spacing: 0.05em; margin-top: 0.15rem; }
+.bl-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3); letter-spacing: 0.08em; }
+.bl-stats-dot { color: var(--accent2); }
+
+/* ─── Module header ─────────────────────────────────────────── */
+.bl-part-header { padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2.5rem; }
+.bl-part-badge {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  display: inline-block; padding: 0.3rem 0.8rem; border-radius: 4px; margin-bottom: 1rem;
+}
+.badge-1 { background: rgba(232,213,163,0.12); color: var(--accent2); border: 1px solid var(--accent3); }
+.badge-2 { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+.badge-3 { background: rgba(192,132,252,0.1); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); }
+.badge-4 { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+.badge-5 { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+.bl-part-title {
+  font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); margin-bottom: 0.75rem;
+}
+.bl-part-intro { font-family: var(--font-mono); font-size: 0.9rem; color: var(--text2); line-height: 1.72; font-weight: 300; max-width: 640px; }
+
+/* ─── Body typography ───────────────────────────────────────── */
+.bl-lead {
+  font-family: var(--font-serif); font-size: 1.2rem; font-style: italic;
+  line-height: 1.72; color: var(--text); margin-bottom: 2rem;
+  border-left: 2px solid var(--accent3); padding-left: 1.5rem;
+}
+.bl-body h2 {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 800;
+  letter-spacing: -0.025em; line-height: 1.2; margin: 3.5rem 0 0.875rem;
+  color: var(--text); padding-top: 0.5rem; border-top: 1px solid var(--border);
+}
+.bl-body h3 {
+  font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
+  letter-spacing: -0.01em; margin: 2.5rem 0 0.6rem; color: var(--text);
+}
+.bl-body h4 {
+  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase; margin: 2rem 0 0.5rem; color: var(--accent2);
+}
+.bl-body p {
+  font-family: var(--font-mono); font-size: 0.95rem; font-weight: 300;
+  line-height: 1.85; color: var(--text2); margin-bottom: 1.25rem;
+}
+.bl-body p:last-child { margin-bottom: 0; }
+.bl-body p strong { color: var(--text); font-weight: 500; }
+.bl-body p em { color: var(--accent); font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+.bl-body ul, .bl-body ol { padding-left: 1.5rem; margin: 1.25rem 0; }
+.bl-body li { font-family: var(--font-mono); font-size: 0.92rem; font-weight: 300; line-height: 1.75; color: var(--text2); margin-bottom: 0.5rem; }
+.bl-body li strong { color: var(--text); font-weight: 500; }
+
+/* ─── Code ──────────────────────────────────────────────────── */
+.bl-body code {
+  font-family: var(--font-mono); font-size: 0.83em;
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 0.12em 0.4em; border-radius: 4px; color: var(--accent2);
+}
+.bl-body pre {
+  background: #0d0d0d; border: 1px solid var(--border); border-radius: 8px;
+  padding: 1.5rem; overflow-x: auto; margin: 1.75rem 0;
+  position: relative; box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] .bl-body pre { background: #1a1a1a; }
+.bl-body pre code { background: none; border: none; padding: 0; font-size: 0.82rem; line-height: 1.72; color: #d4d4d4; }
+.code-lang { position: absolute; top: 0.6rem; right: 0.85rem; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* Syntax */
+.kw { color: #569cd6; } .fn { color: #dcdcaa; } .st { color: #ce9178; }
+.cm { color: #6a9955; font-style: italic; } .nm { color: #b5cea8; }
+.c-key { color: #ff7b72; } .c-str { color: #a5d6ff; } .c-num { color: #79c0ff; }
+.c-comment { color: #6a9955; font-style: italic; } .c-method { color: #4ade80; }
+.c-url { color: #e8d5a3; } .c-status { color: #60a5fa; }
+.c-field { color: #d2a8ff; } .c-val { color: #a5d6ff; }
+
+/* ─── Callouts ──────────────────────────────────────────────── */
+.callout { border-radius: 8px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+.callout-insight { background: rgba(232,213,163,0.07); border-color: var(--accent2); }
+.callout-warning  { background: rgba(248,113,113,0.07); border-color: #f87171; }
+.callout-tip      { background: rgba(74,222,128,0.07);  border-color: var(--green); }
+.callout-info     { background: rgba(96,165,250,0.07);  border-color: #60a5fa; }
+.callout-label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.callout-insight .callout-label { color: var(--accent2); }
+.callout-warning  .callout-label { color: #f87171; }
+.callout-tip      .callout-label { color: var(--green); }
+.callout-info     .callout-label { color: #60a5fa; }
+.callout p { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 300; line-height: 1.72; color: var(--text2); margin-bottom: 0; }
+.callout p strong { color: var(--text); }
+
+/* ─── Pull quote ─────────────────────────────────────────────── */
+.pullquote {
+  border-left: 2px solid var(--accent); margin: 2.5rem 0;
+  padding: 0.25rem 0 0.25rem 1.5rem;
+  font-family: var(--font-serif); font-size: 1.25rem; font-style: italic;
+  line-height: 1.55; color: var(--text);
+}
+
+/* ─── Divider ────────────────────────────────────────────────── */
+.divider { display: flex; align-items: center; gap: 1rem; margin: 3rem 0; color: var(--text3); font-size: 1rem; letter-spacing: 0.3em; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ─── TOC ────────────────────────────────────────────────────── */
+.bl-toc { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem 1.75rem; margin: 2rem 0; }
+.bl-toc-title { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.bl-toc-part { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent3); margin: 1rem 0 0.5rem; }
+.bl-toc-part:first-of-type { margin-top: 0; }
+.bl-toc ul { list-style: none; padding: 0; margin: 0; }
+.bl-toc li { margin-bottom: 0.35rem; }
+.bl-toc a { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 300; color: var(--accent2); text-decoration: none; transition: color 0.2s; }
+.bl-toc a:hover { color: var(--accent); }
+
+/* ─── Tags ───────────────────────────────────────────────────── */
+.bl-tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; }
+.bl-tag { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); background: var(--accent-glow); border: 1px solid rgba(232,213,163,0.18); padding: 0.25rem 0.65rem; border-radius: 4px; }
+
+/* ─── Compare table ──────────────────────────────────────────── */
+.compare-table { width: 100%; border-collapse: collapse; margin: 1.75rem 0; font-size: 0.82rem; font-family: var(--font-mono); }
+.compare-table th { background: var(--surface); color: var(--text); padding: 0.75rem 1rem; text-align: left; font-weight: 600; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid var(--border2); }
+.compare-table th:first-child { border-radius: 6px 0 0 0; }
+.compare-table th:last-child  { border-radius: 0 6px 0 0; }
+.compare-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text2); }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+.compare-table td:first-child { color: var(--text); font-weight: 500; }
+.compare-table code { font-size: 0.8em; }
+.t-url { color: var(--accent) !important; }
+.t-desc { color: var(--text2); font-weight: 300; }
+
+/* ─── HTTP method badges ─────────────────────────────────────── */
+.badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 600; margin-right: 4px; white-space: nowrap; }
+.badge-get    { background: rgba(74,222,128,0.12);  color: var(--green);   border: 1px solid rgba(74,222,128,0.25); }
+.badge-post   { background: rgba(196,169,107,0.12); color: var(--accent2); border: 1px solid rgba(196,169,107,0.25); }
+.badge-put    { background: rgba(232,213,163,0.10); color: var(--accent);  border: 1px solid rgba(232,213,163,0.2); }
+.badge-patch  { background: rgba(96,165,250,0.1);   color: #60a5fa;        border: 1px solid rgba(96,165,250,0.25); }
+.badge-delete { background: rgba(248,113,113,0.1);  color: #f87171;        border: 1px solid rgba(248,113,113,0.25); }
+
+/* ─── Chip rows ──────────────────────────────────────────────── */
+.chip-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; }
+.chip { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; padding: 0.3rem 0.75rem; border-radius: 20px; }
+.chip-pro { background: rgba(74,222,128,0.1);   color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.chip-con { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+
+/* ─── Flow / ASCII diagrams ──────────────────────────────────── */
+.flow-diagram { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.65; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; overflow-x: auto; white-space: pre; color: var(--text2); margin: 1.5rem 0; }
+.diagram-caption { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text3); text-align: center; margin-top: 0.75rem; font-style: italic; letter-spacing: 0.03em; }
+
+/* ─── Card grid ──────────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.info-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; transition: border-color 0.2s; }
+.info-card:hover { border-color: var(--accent3); }
+.info-card-icon { font-size: 1.4rem; margin-bottom: 0.65rem; line-height: 1; }
+.info-card h4 { font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; letter-spacing: -0.01em; margin-top: 0; }
+.info-card p { font-family: var(--font-mono); font-size: 0.83rem; font-weight: 300; color: var(--text2); margin: 0; line-height: 1.65; }
+
+/* ─── Takeaway grid ──────────────────────────────────────────── */
+.takeaway-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0; }
+.takeaway-card { border-radius: 8px; padding: 1.25rem; background: var(--bg2); border: 1px solid var(--border); transition: border-color 0.2s; }
+.takeaway-card:hover { border-color: var(--accent3); }
+.takeaway-num { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--border2); line-height: 1; margin-bottom: 0.65rem; letter-spacing: -0.04em; }
+.takeaway-text { font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.65; color: var(--text2); font-weight: 300; }
+.takeaway-text strong { color: var(--text); font-weight: 500; }
+
+/* ─── Design flow steps ──────────────────────────────────────── */
+.design-steps { display: flex; flex-direction: column; gap: 0; margin: 2rem 0; }
+.design-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.design-step:last-child { border-bottom: none; }
+.design-step-num { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; color: var(--accent2); background: var(--accent-glow); border: 1px solid rgba(196,169,107,0.2); border-radius: 4px; padding: 0.25rem 0.55rem; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
+.design-step-label { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+.design-step-text  { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 300; color: var(--text2); line-height: 1.7; }
+
+/* ─── Project hero ───────────────────────────────────────────── */
+.project-hero { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 2rem; margin-bottom: 2.5rem; position: relative; overflow: hidden; }
+.project-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, var(--accent-glow), transparent); pointer-events: none; }
+.project-tag { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--accent-glow); border: 1px solid rgba(196,169,107,0.25); border-radius: 20px; padding: 0.25rem 0.875rem; font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent2); margin-bottom: 1rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.project-hero h3 { font-family: var(--font-display); font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 800; margin-bottom: 0.6rem; letter-spacing: -0.025em; color: var(--text); margin-top: 0; }
+.project-hero > p { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 300; color: var(--text2); max-width: 600px; margin-bottom: 1.25rem; line-height: 1.7; }
+.tech-stack { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tech-pill { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 0.25rem 0.75rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--text3); letter-spacing: 0.05em; }
+
+/* ─── Status code grid ───────────────────────────────────────── */
+.status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; margin: 1.25rem 0; }
+.status-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; transition: border-color 0.2s; }
+.status-card:hover { border-color: var(--accent3); }
+.status-code { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; margin-bottom: 0.2rem; letter-spacing: -0.03em; line-height: 1; }
+.s-2xx { color: var(--green); } .s-3xx { color: var(--accent); } .s-4xx { color: var(--accent2); } .s-5xx { color: #f87171; }
+.status-name { font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+.status-desc { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text3); line-height: 1.5; }
+
+/* ─── CTA ────────────────────────────────────────────────────── */
+.bl-cta { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 2.5rem 2rem; text-align: center; margin: 3rem 0 2rem; }
+.bl-cta-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin-bottom: 0.6rem; }
+.bl-cta-sub { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 300; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.65; }
+.bl-cta-btn { display: inline-block; background: var(--accent); color: var(--bg); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.75rem 1.75rem; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s, transform 0.2s; }
+.bl-cta-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+.bl-post-footer { text-align: center; padding: 2.5rem 0 1rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+.bl-post-footer p { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text3); font-weight: 300; }
+.bl-post-footer a { color: var(--accent2); text-decoration: underline; text-underline-offset: 3px; }
+.bl-post-footer a:hover { color: var(--accent); }
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .bl-cover-title { font-size: 2.2rem; }
+  .bl-part-title  { font-size: 1.6rem; }
+  .compare-table  { font-size: 0.75rem; }
+  .compare-table td, .compare-table th { padding: 0.5rem 0.65rem; }
+  .bl-partnav { gap: 0.35rem; }
+  .bl-pill { font-size: 0.65rem; padding: 0.35rem 0.75rem; }
+  .takeaway-grid { grid-template-columns: 1fr; }
+  .status-grid { grid-template-columns: 1fr 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- ═══════════ MODULE NAV ═══════════════════════════════════════ -->
+<div class="bl-partnav">
+  <button class="bl-pill active" data-bl-part="0">Cover</button>
+  <button class="bl-pill" data-bl-part="1">I — Foundations</button>
+  <button class="bl-pill" data-bl-part="2">II — Core Design</button>
+  <button class="bl-pill" data-bl-part="3">III — Advanced</button>
+  <button class="bl-pill" data-bl-part="4">IV — Projects</button>
+</div>
+
+<!-- ═══════════ COVER ════════════════════════════════════════════ -->
+<div class="bl-part visible" id="bl-part-0">
+<div class="bl-cover">
+  <div class="bl-series-tag">⬡ 4-Part Engineering Masterclass</div>
+  <h1 class="bl-cover-title">REST API Design:<br><em>From Zero → Principal Engineer</em></h1>
+  <p class="bl-cover-sub">
+    Everything you need to design, architect, and document production-grade REST APIs.
+    Deep theory, real-world patterns, security, caching, versioning, and 3 complete projects.
+  </p>
+  <div class="bl-author-row">
+    <div class="bl-avatar">SE</div>
+    <div>
+      <div class="bl-author-name">Senior Engineers Collective</div>
+      <div class="bl-author-desc">Stripe · GitHub · Twilio · Vercel</div>
+    </div>
+  </div>
+  <div class="bl-stats">
+    <span><span class="bl-stats-dot">·</span> ~60 min read</span>
+    <span><span class="bl-stats-dot">·</span> 15 modules</span>
+    <span><span class="bl-stats-dot">·</span> 3 complete projects</span>
+    <span><span class="bl-stats-dot">·</span> 100+ code examples</span>
+  </div>
+</div>
+
+<div class="bl-body">
+  <div class="bl-toc">
+    <div class="bl-toc-title">Table of Contents</div>
+    <div class="bl-toc-part">Part I — Foundations</div>
+    <ul>
+      <li><a href="#" onclick="window.blShowPart(1);return false;">What is REST? The philosophy and 6 constraints</a></li>
+      <li><a href="#" onclick="window.blShowPart(1);return false;">HTTP deep dive — methods, headers, versions</a></li>
+      <li><a href="#" onclick="window.blShowPart(1);return false;">Resource design — the core skill</a></li>
+      <li><a href="#" onclick="window.blShowPart(1);return false;">URL architecture — naming &amp; structure</a></li>
+      <li><a href="#" onclick="window.blShowPart(1);return false;">Request &amp; response design patterns</a></li>
+    </ul>
+    <div class="bl-toc-part">Part II — Core Design</div>
+    <ul>
+      <li><a href="#" onclick="window.blShowPart(2);return false;">HTTP status codes — the complete guide</a></li>
+      <li><a href="#" onclick="window.blShowPart(2);return false;">Authentication &amp; authorization (JWT, OAuth)</a></li>
+      <li><a href="#" onclick="window.blShowPart(2);return false;">API versioning strategies</a></li>
+      <li><a href="#" onclick="window.blShowPart(2);return false;">Pagination, filtering &amp; sorting</a></li>
+      <li><a href="#" onclick="window.blShowPart(2);return false;">Error handling — the complete system</a></li>
+    </ul>
+    <div class="bl-toc-part">Part III — Advanced Topics</div>
+    <ul>
+      <li><a href="#" onclick="window.blShowPart(3);return false;">Security patterns — OWASP API Top 10</a></li>
+      <li><a href="#" onclick="window.blShowPart(3);return false;">Rate limiting &amp; throttling</a></li>
+      <li><a href="#" onclick="window.blShowPart(3);return false;">Caching strategies</a></li>
+      <li><a href="#" onclick="window.blShowPart(3);return false;">API documentation standards (OpenAPI)</a></li>
+      <li><a href="#" onclick="window.blShowPart(3);return false;">Senior engineer design principles</a></li>
+    </ul>
+    <div class="bl-toc-part">Part IV — Real Projects</div>
+    <ul>
+      <li><a href="#" onclick="window.blShowPart(4);return false;">Project 1: E-Commerce Platform API</a></li>
+      <li><a href="#" onclick="window.blShowPart(4);return false;">Project 2: Real-Time Chat API</a></li>
+      <li><a href="#" onclick="window.blShowPart(4);return false;">Project 3: Multi-Tenant SaaS Platform</a></li>
+    </ul>
+  </div>
+
+  <div class="bl-tag-row">
+    <span class="bl-tag">REST API</span>
+    <span class="bl-tag">Backend Engineering</span>
+    <span class="bl-tag">System Design</span>
+    <span class="bl-tag">HTTP</span>
+    <span class="bl-tag">Authentication</span>
+    <span class="bl-tag">Security</span>
+    <span class="bl-tag">Interview Prep</span>
+  </div>
+</div>
+</div><!-- /cover -->
+
+<!-- ═══════════ PART I — FOUNDATIONS ════════════════════════════ -->
+<div class="bl-part" id="bl-part-1">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-1">Part I of IV</span>
+  <h1 class="bl-part-title">Foundations &amp; Resource Design</h1>
+  <p class="bl-part-intro">REST philosophy, HTTP internals, and the art of designing clean resource hierarchies. The fundamentals that every decision flows from.</p>
+</div>
+
+<div class="bl-body">
+<p class="bl-lead">The difference between a junior dev who builds APIs and a senior engineer who designs them is this: the senior understands that every URL, every status code, every field name is a contract — and contracts are hard to break.</p>
+
+<h2>What is REST? The Philosophy</h2>
+<p>REST (Representational State Transfer) was defined by Roy Fielding in his 2000 PhD dissertation. It's not a protocol, not a standard — it's an <strong>architectural style</strong>. Understanding this distinction is what separates junior devs from engineers.</p>
+
+<h3>The 6 REST Constraints</h3>
+<p>Every constraint exists for a reason. Internalize these — they drive every design decision you'll ever make.</p>
+
+<div class="card-grid">
+  <div class="info-card"><div class="info-card-icon">🖥️</div><h4>1. Client-Server Separation</h4><p>Client handles UI. Server handles data. They evolve independently. Your mobile app, web app, and third-party integrations can all use the same API.</p></div>
+  <div class="info-card"><div class="info-card-icon">📦</div><h4>2. Statelessness</h4><p>Every request contains ALL information needed to process it. The server stores ZERO client session state. Auth token, pagination offset, user ID — all in the request.</p></div>
+  <div class="info-card"><div class="info-card-icon">💾</div><h4>3. Cacheability</h4><p>Responses must declare whether they're cacheable. Cache reduces server load, cuts latency, and improves perceived performance. <code>Cache-Control</code> and <code>ETag</code> implement this.</p></div>
+  <div class="info-card"><div class="info-card-icon">🏛️</div><h4>4. Uniform Interface</h4><p>Resources identified by URIs. Manipulation through representations. Self-descriptive messages. HATEOAS. This is what makes REST <em>RESTful</em>.</p></div>
+  <div class="info-card"><div class="info-card-icon">🧅</div><h4>5. Layered System</h4><p>Client can't tell if it's connected directly to the server or through a load balancer, CDN, or proxy. Enables infrastructure changes without breaking clients.</p></div>
+  <div class="info-card"><div class="info-card-icon">📄</div><h4>6. Code on Demand (Optional)</h4><p>Server can extend client functionality by sending executable code. Optional constraint. Used rarely in practice but enables rich client experiences.</p></div>
+</div>
+
+<h3>REST vs Other Paradigms</h3>
+<div style="overflow-x:auto">
+<table class="compare-table">
+  <thead><tr><th>Paradigm</th><th>Best For</th><th>Weakness</th></tr></thead>
+  <tbody>
+    <tr><td class="t-url">REST</td><td class="t-desc">CRUD APIs, public APIs, microservices</td><td class="t-desc">Over/under-fetching, multiple roundtrips</td></tr>
+    <tr><td class="t-url">GraphQL</td><td class="t-desc">Complex data graphs, client-driven queries</td><td class="t-desc">Caching complexity, N+1 problems</td></tr>
+    <tr><td class="t-url">gRPC</td><td class="t-desc">Internal microservices, low-latency streaming</td><td class="t-desc">Browser support limited, binary format</td></tr>
+    <tr><td class="t-url">WebSocket</td><td class="t-desc">Real-time bidirectional communication</td><td class="t-desc">Stateful, scaling is hard</td></tr>
+    <tr><td class="t-url">SOAP</td><td class="t-desc">Enterprise, banking, legacy systems</td><td class="t-desc">Verbose XML, complex WSDL</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout-insight">
+  <div class="callout-label">💡 Senior Engineer Insight</div>
+  <p>REST is not "always the right answer." A senior engineer chooses the right tool. Real-time features? WebSocket. Internal service mesh? gRPC. Complex product queries? GraphQL. Know REST deeply, know when NOT to use it.</p>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>HTTP Deep Dive — The Engine</h2>
+<p>HTTP is the transport layer of your API. Every performance optimization, every security decision, every caching strategy lives here.</p>
+
+<h3>HTTP Methods — Idempotency &amp; Safety</h3>
+<div style="overflow-x:auto">
+<table class="compare-table">
+  <thead><tr><th>Method</th><th>Safe</th><th>Idempotent</th><th>Body</th><th>Use Case</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-get">GET</span></td><td style="color:var(--green)">✓</td><td style="color:var(--green)">✓</td><td style="color:var(--text3)">No</td><td class="t-desc">Retrieve resource(s)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td style="color:#f87171">✗</td><td style="color:#f87171">✗</td><td style="color:var(--green)">Yes</td><td class="t-desc">Create resource, trigger action</td></tr>
+    <tr><td><span class="badge badge-put">PUT</span></td><td style="color:#f87171">✗</td><td style="color:var(--green)">✓</td><td style="color:var(--green)">Yes</td><td class="t-desc">Replace resource entirely</td></tr>
+    <tr><td><span class="badge badge-patch">PATCH</span></td><td style="color:#f87171">✗</td><td style="color:#f87171">✗*</td><td style="color:var(--green)">Yes</td><td class="t-desc">Partial update</td></tr>
+    <tr><td><span class="badge badge-delete">DELETE</span></td><td style="color:#f87171">✗</td><td style="color:var(--green)">✓</td><td style="color:var(--text3)">Optional</td><td class="t-desc">Remove resource</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Critical Headers Every API Must Handle</h3>
+<pre><span class="c-comment"># REQUEST HEADERS</span>
+<span class="c-key">Content-Type</span>: <span class="c-str">application/json</span>              <span class="c-comment"># What format am I sending?</span>
+<span class="c-key">Accept</span>: <span class="c-str">application/json</span>                   <span class="c-comment"># What format do I want back?</span>
+<span class="c-key">Authorization</span>: <span class="c-str">Bearer eyJhbGciOiJIUzI1...</span>  <span class="c-comment"># Who am I?</span>
+<span class="c-key">Idempotency-Key</span>: <span class="c-str">uuid-v4-here</span>               <span class="c-comment"># Safe retries for POST</span>
+<span class="c-key">X-Request-ID</span>: <span class="c-str">trace-id-for-logging</span>          <span class="c-comment"># Distributed tracing</span>
+
+<span class="c-comment"># RESPONSE HEADERS</span>
+<span class="c-key">Cache-Control</span>: <span class="c-str">max-age=3600, must-revalidate</span>
+<span class="c-key">ETag</span>: <span class="c-str">"resource-hash-abc123"</span>
+<span class="c-key">X-RateLimit-Limit</span>: <span class="c-num">1000</span>
+<span class="c-key">X-RateLimit-Remaining</span>: <span class="c-num">847</span>
+<span class="c-key">Location</span>: <span class="c-str">/api/v1/users/456</span>                <span class="c-comment"># Created resource URL (201)</span></pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Resource Design — The Core Skill</h2>
+<p>Resource design is THE skill that defines API quality. A well-designed resource model makes an API intuitive. A bad one creates technical debt that haunts you for years.</p>
+
+<h3>Think in Nouns, Not Verbs</h3>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0">
+  <pre style="background:#0d0d0d;border:1px solid #f87171;border-radius:8px;padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8rem;line-height:1.7">
+<span class="c-comment">❌ BAD — RPC-style</span>
+
+POST /createUser
+POST /deleteUser
+POST /getUserById
+POST /updateUserEmail
+POST /activateUserAccount
+  </pre>
+
+  <pre style="background:#0d0d0d;border:1px solid var(--green);border-radius:8px;padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8rem;line-height:1.7">
+<span class="c-comment">✅ GOOD — Resource-oriented</span>
+
+POST   /users
+DELETE /users/{id}
+GET    /users/{id}
+PATCH  /users/{id}
+PATCH  /users/{id}/status
+  </pre>
+</div>
+
+<h3>Resource Hierarchy</h3>
+<pre><span class="c-method">Users</span>     └─ <span class="c-url">/users/{userId}/addresses</span>    <span class="c-comment"># owned by user</span>
+          └─ <span class="c-url">/users/{userId}/orders</span>
+
+<span class="c-method">Products</span>  └─ <span class="c-url">/products/{id}/reviews</span>
+          └─ <span class="c-url">/products/{id}/images</span>
+
+<span class="c-method">Orders</span>    └─ <span class="c-url">/orders/{id}/items</span>
+          └─ <span class="c-url">/orders/{id}/payments</span>
+          └─ <span class="c-url">/orders/{id}/shipments</span></pre>
+
+<div class="callout callout-warning">
+  <div class="callout-label">⚠️ Nesting Rule of Thumb</div>
+  <p>Never nest more than 2 levels deep. <code>/a/{id}/b/{id}</code> is fine. <code>/a/{id}/b/{id}/c/{id}/d</code> is a red flag. Deep nesting creates tight coupling and fragile URLs. If you need deeper, create a top-level resource.</p>
+</div>
+
+<h3>The Action Pattern</h3>
+<p>Some operations are inherently procedural. Force-fitting them into CRUD creates confusion. Use sub-resources as actions:</p>
+<pre>POST <span class="c-url">/orders/{id}/cancel</span>          <span class="c-comment"># Cancel order (state machine)</span>
+POST <span class="c-url">/orders/{id}/refund</span>           <span class="c-comment"># Issue refund</span>
+POST <span class="c-url">/users/{id}/verify-email</span>      <span class="c-comment"># Trigger verification flow</span>
+POST <span class="c-url">/payments/{id}/capture</span>        <span class="c-comment"># Capture pre-auth payment</span></pre>
+
+<div class="divider">· · ·</div>
+<h2>URL Architecture — Naming Rules</h2>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0">
+  <pre style="background:#0d0d0d;border:1px solid #f87171;border-radius:8px;padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8rem;line-height:1.7">
+<span class="c-comment">❌ BAD patterns</span>
+
+ /getUsers
+ /Users
+ /user_list
+ /GetAllUsers
+ /Users/{UserId}/Orders
+ /USER-PROFILE
+  </pre>
+
+  <pre style="background:#0d0d0d;border:1px solid var(--green);border-radius:8px;padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8rem;line-height:1.7">
+<span class="c-comment">✅ GOOD patterns</span>
+
+ /users
+ /users
+ /users
+ /users
+ /users/{userId}/orders
+ /users/{userId}/profile
+  </pre>
+</div>
+
+<ul>
+  <li>Use <strong>lowercase</strong> always. Never camelCase or PascalCase in URLs.</li>
+  <li>Use <strong>hyphens</strong> for multi-word paths: <code>/blog-posts</code> not <code>/blog_posts</code></li>
+  <li>Use <strong>plural nouns</strong> for collections: <code>/users</code> not <code>/user</code></li>
+  <li>Use <strong>camelCase for query params</strong>: <code>?sortBy=createdAt&amp;pageSize=20</code></li>
+  <li>Prefer <strong>UUIDs over sequential IDs</strong> — sequential IDs reveal scale and enable enumeration attacks</li>
+</ul>
+
+<h3>Query Parameter Taxonomy</h3>
+<pre><span class="c-comment"># FILTERING</span>
+GET <span class="c-url">/products?category=electronics&amp;inStock=true&amp;minPrice=100</span>
+
+<span class="c-comment"># SORTING</span>
+GET <span class="c-url">/users?sortBy=createdAt&amp;order=desc</span>
+
+<span class="c-comment"># PAGINATION (cursor-based preferred)</span>
+GET <span class="c-url">/users?cursor=eyJpZCI6MjB9&amp;limit=20</span>
+
+<span class="c-comment"># FIELD SELECTION — reduce payload</span>
+GET <span class="c-url">/users?fields=id,email,name</span>
+GET <span class="c-url">/orders?include=items,customer</span>    <span class="c-comment"># expand related</span></pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Request &amp; Response Design</h2>
+
+<h3>The Envelope Pattern</h3>
+<p>Always wrap responses. Never return a naked array. The envelope allows you to add metadata without breaking clients.</p>
+
+<pre><span class="c-comment"># GET /users — collection response</span>
+{
+  <span class="c-field">"success"</span>: <span class="c-key">true</span>,
+  <span class="c-field">"data"</span>: [{
+    <span class="c-field">"id"</span>:        <span class="c-str">"usr_01HX7K..."</span>,
+    <span class="c-field">"email"</span>:     <span class="c-str">"alice@example.com"</span>,
+    <span class="c-field">"firstName"</span>: <span class="c-str">"Alice"</span>,
+    <span class="c-field">"createdAt"</span>: <span class="c-str">"2024-01-15T10:30:00Z"</span>   <span class="c-comment">// ISO 8601, always UTC</span>
+  }],
+  <span class="c-field">"pagination"</span>: {
+    <span class="c-field">"total"</span>: <span class="c-num">1847</span>, <span class="c-field">"page"</span>: <span class="c-num">1</span>, <span class="c-field">"pageSize"</span>: <span class="c-num">20</span>,
+    <span class="c-field">"hasNext"</span>: <span class="c-key">true</span>, <span class="c-field">"nextCursor"</span>: <span class="c-str">"eyJpZCI6IjIwIn0="</span>
+  },
+  <span class="c-field">"meta"</span>: { <span class="c-field">"requestId"</span>: <span class="c-str">"req_abc123"</span>, <span class="c-field">"version"</span>: <span class="c-str">"v1"</span> }
+}</pre>
+
+<h3>Data Type Rules</h3>
+<ul>
+  <li><strong>IDs:</strong> Strings, not integers. Use UUID v4 or prefixed IDs like <code>usr_01HX7K</code>. Never expose sequential DB IDs.</li>
+  <li><strong>Timestamps:</strong> ISO 8601 UTC with Z suffix: <code>"2024-01-15T10:30:00Z"</code>. Never Unix timestamps in JSON bodies.</li>
+  <li><strong>Money:</strong> Integers (cents). <code>"amount": 4999</code> = $49.99. Never floats — float math breaks money.</li>
+  <li><strong>Enums:</strong> SCREAMING_SNAKE_CASE: <code>"status": "PENDING_PAYMENT"</code>. Document all valid values.</li>
+</ul>
+
+<div class="bl-cta">
+  <div class="bl-cta-title">Ready for Part II?</div>
+  <div class="bl-cta-sub">Foundations mastered. Now the real design decisions: status codes, auth, versioning, pagination, and error handling.</div>
+  <button class="bl-cta-btn" data-bl-part="2">Continue to Part II: Core Design →</button>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-1 -->
+
+<!-- ═══════════ PART II — CORE DESIGN ════════════════════════════ -->
+<div class="bl-part" id="bl-part-2">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-2">Part II of IV</span>
+  <h1 class="bl-part-title">Core Design Decisions</h1>
+  <p class="bl-part-intro">Status codes, authentication, versioning, pagination, and error handling — the decisions that define the quality of your API contract.</p>
+</div>
+
+<div class="bl-body">
+<p class="bl-lead">A junior dev returns 200 for everything and parses the body to find errors. A senior engineer uses HTTP exactly as it was designed: status codes are the contract, response bodies are the detail.</p>
+
+<h2>HTTP Status Codes — The Complete Guide</h2>
+
+<h3>2xx — Success</h3>
+<div class="status-grid">
+  <div class="status-card"><div class="status-code s-2xx">200</div><div class="status-name">OK</div><div class="status-desc">GET/PATCH success. Resource returned in body.</div></div>
+  <div class="status-card"><div class="status-code s-2xx">201</div><div class="status-name">Created</div><div class="status-desc">POST success. Include Location header + created resource.</div></div>
+  <div class="status-card"><div class="status-code s-2xx">202</div><div class="status-name">Accepted</div><div class="status-desc">Async processing started. Return job/status URL.</div></div>
+  <div class="status-card"><div class="status-code s-2xx">204</div><div class="status-name">No Content</div><div class="status-desc">DELETE success. Empty body — nothing to return.</div></div>
+</div>
+
+<h3>4xx — Client Errors</h3>
+<div class="status-grid">
+  <div class="status-card"><div class="status-code s-4xx">400</div><div class="status-name">Bad Request</div><div class="status-desc">Invalid input, malformed JSON, validation failed.</div></div>
+  <div class="status-card"><div class="status-code s-4xx">401</div><div class="status-name">Unauthorized</div><div class="status-desc">Not authenticated. Include WWW-Authenticate header.</div></div>
+  <div class="status-card"><div class="status-code s-4xx">403</div><div class="status-name">Forbidden</div><div class="status-desc">Authenticated but not authorized for this resource.</div></div>
+  <div class="status-card"><div class="status-code s-4xx">404</div><div class="status-name">Not Found</div><div class="status-desc">Resource doesn't exist. Also use to hide 403s.</div></div>
+  <div class="status-card"><div class="status-code s-4xx">409</div><div class="status-name">Conflict</div><div class="status-desc">Duplicate email, version conflict, business rule violation.</div></div>
+  <div class="status-card"><div class="status-code s-4xx">422</div><div class="status-name">Unprocessable</div><div class="status-desc">Syntactically valid but semantically wrong. Use for validation errors.</div></div>
+  <div class="status-card"><div class="status-code s-4xx">429</div><div class="status-name">Too Many</div><div class="status-desc">Rate limited. Always include Retry-After header.</div></div>
+</div>
+
+<h3>5xx — Server Errors</h3>
+<div class="status-grid">
+  <div class="status-card"><div class="status-code s-5xx">500</div><div class="status-name">Server Error</div><div class="status-desc">Unhandled exception. Log it. Never expose stack traces.</div></div>
+  <div class="status-card"><div class="status-code s-5xx">502</div><div class="status-name">Bad Gateway</div><div class="status-desc">Upstream service returned invalid response.</div></div>
+  <div class="status-card"><div class="status-code s-5xx">503</div><div class="status-name">Unavailable</div><div class="status-desc">Maintenance/overload. Include Retry-After header.</div></div>
+  <div class="status-card"><div class="status-code s-5xx">504</div><div class="status-name">Timeout</div><div class="status-desc">Upstream timed out. Check your service dependencies.</div></div>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-label">🚫 The Anti-Pattern That Kills APIs</div>
+  <p>Never return <code>200 OK</code> with <code>{"success": false, "error": "not found"}</code>. This forces clients to parse every response body to know if the request succeeded. HTTP status codes exist exactly to avoid this. Use them.</p>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Authentication &amp; Authorization</h2>
+
+<div class="card-grid">
+  <div class="info-card"><div class="info-card-icon">🔑</div><h4>API Keys</h4><p>Server-to-server. Prefix: <code>sk_live_...</code>. Hash and store — never plain text. Support key rotation. Rate limit per key.</p></div>
+  <div class="info-card"><div class="info-card-icon">🎫</div><h4>JWT (Access + Refresh)</h4><p>Stateless user sessions. Access token: 15min. Refresh: 30d, stored server-side for revocation. Never put sensitive data in payload — it's base64, not encrypted.</p></div>
+  <div class="info-card"><div class="info-card-icon">🔐</div><h4>OAuth 2.0</h4><p>Third-party access delegation. Four flows: Authorization Code (web), PKCE (mobile/SPA), Client Credentials (server-to-server), Device Flow.</p></div>
+</div>
+
+<h3>JWT Flow — Under the Hood</h3>
+<pre><span class="c-comment"># 1. LOGIN</span>
+POST <span class="c-url">/auth/login</span>  →  {<span class="c-field">"accessToken"</span>: <span class="c-str">"eyJ..."</span>, <span class="c-field">"refreshToken"</span>: <span class="c-str">"dGhp..."</span>, <span class="c-field">"expiresIn"</span>: <span class="c-num">900</span>}
+
+<span class="c-comment"># 2. USE on every request</span>
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
+
+<span class="c-comment"># 3. REFRESH before expiry</span>
+POST <span class="c-url">/auth/refresh</span>  {<span class="c-field">"refreshToken"</span>: <span class="c-str">"dGhp..."</span>}  →  {<span class="c-field">"accessToken"</span>: <span class="c-str">"eyJ_new..."</span>}
+
+<span class="c-comment"># 4. LOGOUT — invalidate refresh token server-side</span>
+POST <span class="c-url">/auth/logout</span>  →  204 No Content
+
+<span class="c-comment"># JWT payload — include what you need for auth decisions</span>
+{
+  <span class="c-field">"sub"</span>:         <span class="c-str">"usr_01HX7K"</span>,
+  <span class="c-field">"role"</span>:        <span class="c-str">"admin"</span>,
+  <span class="c-field">"permissions"</span>: [<span class="c-str">"users:read"</span>, <span class="c-str">"users:write"</span>],
+  <span class="c-field">"orgId"</span>:       <span class="c-str">"org_company123"</span>,   <span class="c-comment">// tenant ID for multi-tenant</span>
+  <span class="c-field">"exp"</span>:         <span class="c-num">1703002500</span>             <span class="c-comment">// 15 min from now</span>
+}</pre>
+
+<div class="divider">· · ·</div>
+
+<h2>API Versioning Strategies</h2>
+
+<div class="card-grid">
+  <div class="info-card"><h4>URL Path ✅ Most Common</h4><p><code>/api/v1/users</code> → <code>/api/v2/users</code>. Highly visible. Easy to test in browser. Cache-friendly. The industry default.</p></div>
+  <div class="info-card"><h4>Custom Header</h4><p><code>API-Version: 2024-01-01</code>. Date-based (Stripe/Azure style). Clean URLs. Invisible in browser. Good for internal APIs.</p></div>
+  <div class="info-card"><h4>Query Parameter</h4><p><code>/users?version=2</code>. Easy to implement but awkward for clients. Generally avoid unless you have legacy constraints.</p></div>
+  <div class="info-card"><h4>Content Negotiation</h4><p><code>Accept: application/vnd.myapi.v2+json</code>. Most RESTfully correct. Extremely complex. Almost never used in practice.</p></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0">
+  <pre style="background:#0d0d0d;border:1px solid #f87171;border-radius:8px;padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8rem;line-height:1.7">
+<span class="c-comment">❌ BREAKING — needs new version</span>
+
+- Removing an endpoint
+- Removing a field from response
+- Changing field type (string → int)
+- Changing field name
+- Adding required request field
+- Changing status code behavior
+  </pre>
+
+  <pre style="background:#0d0d0d;border:1px solid var(--green);border-radius:8px;padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8rem;line-height:1.7">
+<span class="c-comment">✅ NON-BREAKING — safe to ship</span>
+
+- Adding new endpoints
+- Adding optional response fields
+- Adding optional request fields
+- Adding new enum values (with care)
+- Bug fixes, performance improvements
+- Adding new query parameters
+  </pre>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Pagination, Filtering &amp; Sorting</h2>
+
+<div class="card-grid">
+  <div class="info-card"><h4>Offset Pagination</h4><p><code>?page=3&amp;pageSize=20</code>. Jump to any page. Easy to implement. Items shift if data added. Expensive for large offsets (<code>LIMIT 20 OFFSET 10000</code> is slow).</p></div>
+  <div class="info-card"><h4>Cursor Pagination ✅</h4><p><code>?cursor=eyJpZCI6MjB9&amp;limit=20</code>. Consistent even with inserts/deletes. O(1) DB query. Works at infinite scale. Can't jump to page 7.</p></div>
+  <div class="info-card"><h4>Keyset Pagination</h4><p><code>?afterId=usr_123&amp;limit=20</code>. Uses resource's natural ID. Simple. Good for append-only feeds sorted by creation time.</p></div>
+</div>
+
+<pre><span class="c-comment"># Cursor pagination response</span>
+{
+  <span class="c-field">"data"</span>: [...],
+  <span class="c-field">"pagination"</span>: {
+    <span class="c-field">"limit"</span>:      <span class="c-num">20</span>,
+    <span class="c-field">"hasMore"</span>:    <span class="c-key">true</span>,
+    <span class="c-field">"nextCursor"</span>: <span class="c-str">"eyJpZCI6IjQwIn0="</span>  <span class="c-comment">// base64(JSON) of last item's sort fields</span>
+  }
+}</pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Error Handling — The Complete System</h2>
+<p>Errors are part of your API's public interface. A well-designed error response tells the client <strong>exactly what went wrong</strong> and, when possible, <strong>how to fix it</strong>.</p>
+
+<pre style="border-left:3px solid #f87171"><span class="c-comment"># 422 Unprocessable Entity — Validation error</span>
+{
+  <span class="c-field">"success"</span>: <span class="c-key">false</span>,
+  <span class="c-field">"error"</span>: {
+    <span class="c-field">"code"</span>:      <span class="c-str">"VALIDATION_ERROR"</span>,
+    <span class="c-field">"message"</span>:   <span class="c-str">"Request validation failed"</span>,
+    <span class="c-field">"details"</span>:   [
+      { <span class="c-field">"field"</span>: <span class="c-str">"email"</span>,    <span class="c-field">"code"</span>: <span class="c-str">"INVALID_FORMAT"</span> },
+      { <span class="c-field">"field"</span>: <span class="c-str">"password"</span>, <span class="c-field">"code"</span>: <span class="c-str">"TOO_SHORT"</span>, <span class="c-field">"meta"</span>: {<span class="c-field">"minLength"</span>: <span class="c-num">8</span>} }
+    ],
+    <span class="c-field">"requestId"</span>: <span class="c-str">"req_abc123"</span>,
+    <span class="c-field">"docsUrl"</span>:   <span class="c-str">"https://docs.api.com/errors/VALIDATION_ERROR"</span>
+  }
+}</pre>
+
+<pre><span class="c-method">AUTH</span>:        UNAUTHORIZED → 401  |  TOKEN_EXPIRED → 401  |  FORBIDDEN → 403
+<span class="c-method">RESOURCE</span>:    NOT_FOUND → 404     |  ALREADY_EXISTS → 409  |  VERSION_CONFLICT → 409
+<span class="c-method">VALIDATION</span>:  VALIDATION_ERROR → 422  |  INVALID_FORMAT → 422
+<span class="c-method">BUSINESS</span>:    INSUFFICIENT_FUNDS → 422  |  ORDER_NOT_CANCELLABLE → 422
+<span class="c-method">RATE</span>:        QUOTA_EXCEEDED → 429
+<span class="c-method">SERVER</span>:      INTERNAL_ERROR → 500  |  SERVICE_UNAVAILABLE → 503</pre>
+
+<div class="bl-cta">
+  <div class="bl-cta-title">Ready for Advanced Topics?</div>
+  <div class="bl-cta-sub">Security, rate limiting, caching, OpenAPI documentation, and senior engineer design principles.</div>
+  <button class="bl-cta-btn" data-bl-part="3">Continue to Part III: Advanced Topics →</button>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-2 -->
+
+<!-- ═══════════ PART III — ADVANCED ══════════════════════════════ -->
+<div class="bl-part" id="bl-part-3">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-3">Part III of IV</span>
+  <h1 class="bl-part-title">Advanced Topics</h1>
+  <p class="bl-part-intro">Security, rate limiting, caching, documentation, and the design principles that separate good APIs from great ones.</p>
+</div>
+
+<div class="bl-body">
+<p class="bl-lead">The difference between a good API and a production-grade API isn't the happy path — it's security, observability, graceful degradation, and documentation that makes developers love you.</p>
+
+<h2>Security Patterns — OWASP API Top 10</h2>
+
+<ul>
+  <li><strong>BOLA (Broken Object Level Auth)</strong> — Always verify the authenticated user owns the resource. <code>GET /orders/456</code> must check order 456 belongs to <em>this</em> user.</li>
+  <li><strong>Broken Auth</strong> — Short-lived JWTs, rotate secrets, store refresh tokens hashed, implement token revocation.</li>
+  <li><strong>Excessive Data Exposure</strong> — Never return a DB row directly. Serialize only needed fields. That <code>password_hash</code> must never appear in any response.</li>
+  <li><strong>Lack of Resource Limiting</strong> — Rate limit by IP AND by user. Limit response size. Limit query complexity in filters.</li>
+  <li><strong>Mass Assignment</strong> — Never bind request body directly to DB models. Explicitly whitelist allowed fields. Never let users set <code>role: "admin"</code> on themselves.</li>
+  <li><strong>SQL/NoSQL Injection</strong> — Always use parameterized queries. Never interpolate request values into queries.</li>
+  <li><strong>SSRF</strong> — If your API fetches URLs from user input, validate and whitelist allowed domains.</li>
+</ul>
+
+<h3>Essential Security Response Headers</h3>
+<pre><span class="c-key">Strict-Transport-Security</span>: <span class="c-str">max-age=31536000; includeSubDomains</span>
+<span class="c-key">X-Content-Type-Options</span>: <span class="c-str">nosniff</span>
+<span class="c-key">X-Frame-Options</span>: <span class="c-str">DENY</span>
+<span class="c-key">Content-Security-Policy</span>: <span class="c-str">default-src 'none'</span>
+
+<span class="c-comment"># CORS — tightly configure, never use *</span>
+<span class="c-key">Access-Control-Allow-Origin</span>: <span class="c-str">https://yourfrontend.com</span>
+<span class="c-key">Access-Control-Allow-Methods</span>: <span class="c-str">GET, POST, PATCH, DELETE, OPTIONS</span>
+<span class="c-key">Access-Control-Max-Age</span>: <span class="c-str">86400</span></pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Rate Limiting &amp; Throttling</h2>
+
+<div class="card-grid">
+  <div class="info-card"><h4>Token Bucket</h4><p>Bucket refills at constant rate. Allows bursts up to capacity. Best for user-facing APIs — natural, human-friendly behavior.</p></div>
+  <div class="info-card"><h4>Sliding Window</h4><p>Counts in rolling time window. Prevents boundary attacks. Best accuracy. What most production APIs use.</p></div>
+  <div class="info-card"><h4>Fixed Window</h4><p>Simple counter per time window. Easy to implement. Vulnerable to 2× burst at window boundary. Good for internal limits only.</p></div>
+  <div class="info-card"><h4>Leaky Bucket</h4><p>Processes at constant rate. Smoothest traffic. Good for protecting downstream services that can't handle bursts.</p></div>
+</div>
+
+<pre><span class="c-comment"># Rate limit headers on EVERY response (not just 429s)</span>
+<span class="c-key">X-RateLimit-Limit</span>:     <span class="c-num">1000</span>
+<span class="c-key">X-RateLimit-Remaining</span>: <span class="c-num">847</span>
+<span class="c-key">X-RateLimit-Reset</span>:     <span class="c-num">1703005200</span>  <span class="c-comment"># Unix timestamp</span>
+
+<span class="c-comment"># 429 Too Many Requests response body</span>
+{
+  <span class="c-field">"error"</span>: {
+    <span class="c-field">"code"</span>:       <span class="c-str">"RATE_LIMIT_EXCEEDED"</span>,
+    <span class="c-field">"retryAfter"</span>: <span class="c-num">3600</span>,
+    <span class="c-field">"upgradeUrl"</span>: <span class="c-str">"https://yourapi.com/pricing"</span>
+  }
+}</pre>
+
+<div class="callout callout-tip">
+  <div class="callout-label">✅ DX Best Practice</div>
+  <p>Include rate limit headers on <strong>every response</strong>, not just on 429s. Good API clients use these to proactively back off before hitting limits — dramatically reducing wasted requests.</p>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>Caching Strategies</h2>
+
+<pre><span class="c-comment"># Public, cacheable for 1 hour (CDN + browser)</span>
+<span class="c-key">Cache-Control</span>: <span class="c-str">public, max-age=3600</span>
+
+<span class="c-comment"># Private (user-specific), browser only</span>
+<span class="c-key">Cache-Control</span>: <span class="c-str">private, max-age=300</span>
+
+<span class="c-comment"># Never cache (auth endpoints, mutations)</span>
+<span class="c-key">Cache-Control</span>: <span class="c-str">no-store</span>
+
+<span class="c-comment"># Stale-while-revalidate — best UX pattern</span>
+<span class="c-key">Cache-Control</span>: <span class="c-str">public, max-age=60, stale-while-revalidate=300</span>
+<span class="c-comment"># Serve cached for 60s. 60-300s: serve stale but refresh in background.</span>
+
+<span class="c-comment"># ETags — conditional requests (save bandwidth)</span>
+Server sends:  <span class="c-key">ETag</span>: <span class="c-str">"v1-hash-abc123"</span>
+Client sends:  <span class="c-key">If-None-Match</span>: <span class="c-str">"v1-hash-abc123"</span>
+Unchanged →    <span class="c-status">304 Not Modified</span>  (empty body)
+Changed →      <span class="c-status">200 OK</span>            (new content + new ETag)</pre>
+
+<div style="overflow-x:auto">
+<table class="compare-table">
+  <thead><tr><th>Endpoint Type</th><th>Cache Strategy</th><th>TTL</th></tr></thead>
+  <tbody>
+    <tr><td class="t-url">GET /products (catalog)</td><td class="t-desc">public + CDN</td><td class="t-desc">5–60 min</td></tr>
+    <tr><td class="t-url">GET /users/me (profile)</td><td class="t-desc">private, browser only</td><td class="t-desc">5 min</td></tr>
+    <tr><td class="t-url">GET /config (settings)</td><td class="t-desc">public + CDN</td><td class="t-desc">1–24 hours</td></tr>
+    <tr><td class="t-url">POST /auth/login</td><td class="t-desc">no-store</td><td class="t-desc">never</td></tr>
+    <tr><td class="t-url">GET /search?q=...</td><td class="t-desc">public, shared cache</td><td class="t-desc">5–15 min</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="divider">· · ·</div>
+
+<h2>API Documentation Standards</h2>
+<p>Documentation IS the product for developers. Stripe built a $100B company partly on having the best API docs in the industry.</p>
+
+<pre><span class="c-comment"># openapi.yaml — minimum viable skeleton</span>
+<span class="c-key">openapi</span>: <span class="c-str">"3.1.0"</span>
+<span class="c-key">info</span>:
+  <span class="c-key">title</span>: <span class="c-str">"My API"</span>
+  <span class="c-key">version</span>: <span class="c-str">"1.0.0"</span>
+<span class="c-key">servers</span>:
+  - <span class="c-key">url</span>: <span class="c-str">https://api.myplatform.com/v1</span>
+  - <span class="c-key">url</span>: <span class="c-str">https://sandbox.myplatform.com/v1</span>
+<span class="c-key">paths</span>:
+  <span class="c-url">/users</span>:
+    <span class="c-key">get</span>:
+      <span class="c-key">operationId</span>: <span class="c-str">listUsers</span>
+      <span class="c-key">parameters</span>:
+        - {<span class="c-key">name</span>: <span class="c-str">page</span>, <span class="c-key">in</span>: <span class="c-str">query</span>, <span class="c-key">schema</span>: {<span class="c-key">type</span>: <span class="c-str">integer</span>, <span class="c-key">default</span>: <span class="c-num">1</span>}}
+      <span class="c-key">responses</span>:
+        <span class="c-str">'200'</span>: {<span class="c-key">description</span>: <span class="c-str">List of users</span>}</pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Senior Engineer Design Principles</h2>
+
+<div class="design-steps">
+  <div class="design-step"><div class="design-step-num">Step 01</div><div><div class="design-step-label">Domain Modeling</div><div class="design-step-text">Start with nouns. Map your domain entities and their relationships before thinking about endpoints. Users, Products, Orders, Payments — define ownership and hierarchy first.</div></div></div>
+  <div class="design-step"><div class="design-step-num">Step 02</div><div><div class="design-step-label">User Flows</div><div class="design-step-text">What does a client developer need to accomplish? Map the sequence of API calls for each user scenario. Identify where your design creates unnecessary friction.</div></div></div>
+  <div class="design-step"><div class="design-step-num">Step 03</div><div><div class="design-step-label">Resource Tree</div><div class="design-step-text">Translate your domain model into resource hierarchies. Apply the nesting rules. Identify which resources need top-level endpoints vs nested access.</div></div></div>
+  <div class="design-step"><div class="design-step-num">Step 04</div><div><div class="design-step-label">Endpoint List</div><div class="design-step-text">Write out every endpoint: method + path + description. For each, decide: auth required? Rate limited? Cacheable? Async or sync?</div></div></div>
+  <div class="design-step"><div class="design-step-num">Step 05</div><div><div class="design-step-label">Schemas</div><div class="design-step-text">Write OpenAPI spec before writing code. Define every request/response shape. Have a frontend developer use your mock server before you build the backend.</div></div></div>
+  <div class="design-step"><div class="design-step-num">Step 06</div><div><div class="design-step-label">Review &amp; Iterate</div><div class="design-step-text">Walk through every decision: Is naming consistent? Are error codes helpful? Can this change without breaking clients in 2 years? Design is never finished on the first pass.</div></div></div>
+</div>
+
+<div class="pullquote">
+  Senior engineers spend 10x more time designing than coding. An hour of good design prevents a week of refactoring.
+</div>
+
+<div class="bl-cta">
+  <div class="bl-cta-title">Ready to Build?</div>
+  <div class="bl-cta-sub">Three complete production-grade projects: E-Commerce Platform, Real-Time Chat API, and a Multi-Tenant SaaS Platform.</div>
+  <button class="bl-cta-btn" data-bl-part="4">Continue to Part IV: Real Projects →</button>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-3 -->
+
+<!-- ═══════════ PART IV — PROJECTS ════════════════════════════════ -->
+<div class="bl-part" id="bl-part-4">
+<div class="bl-part-header">
+  <span class="bl-part-badge badge-4">Part IV of IV</span>
+  <h1 class="bl-part-title">Real Projects</h1>
+  <p class="bl-part-intro">Three production-grade APIs, fully designed from domain model to endpoint reference. Don't just read — implement these.</p>
+</div>
+
+<div class="bl-body">
+<p class="bl-lead">Theory is nothing without practice. These three projects cover the full spectrum of real-world API design challenges — from simple CRUD to complex multi-tenant SaaS architectures.</p>
+
+<h2>Project 1 — E-Commerce Platform API</h2>
+
+<div class="project-hero">
+  <div class="project-tag">🛒 Project 1 — Backend</div>
+  <h3>E-Commerce Platform API</h3>
+  <p>A complete production-grade REST API for a multi-vendor e-commerce platform. Authentication, product catalog, cart, orders, payments (Stripe), and fulfillment with full data flow.</p>
+  <div class="tech-stack">
+    <span class="tech-pill">Node.js/Express</span>
+    <span class="tech-pill">PostgreSQL</span>
+    <span class="tech-pill">Redis</span>
+    <span class="tech-pill">JWT Auth</span>
+    <span class="tech-pill">Stripe Payments</span>
+    <span class="tech-pill">Webhooks</span>
+  </div>
+</div>
+
+<h3>Domain Model</h3>
+<pre><span class="c-comment">User ─────── has many → Orders, Addresses
+             has one  → Cart (active)
+
+Vendor ────── has many → Products, Orders (as seller)
+
+Product ───── belongs to → Vendor, Category
+             has many  → Variants, Images, Reviews
+
+Order ──────── has one → Payment, Shipment, Address (snapshot)
+             has many → OrderItems
+
+Cart ───────── has many → CartItems → ProductVariant</span></pre>
+
+<h4>Auth Endpoints</h4>
+<div style="overflow-x:auto"><table class="compare-table">
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/auth/register</td><td class="t-desc">Register new user account</td><td>—</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/auth/login</td><td class="t-desc">Login, returns JWT pair</td><td>—</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/auth/refresh</td><td class="t-desc">Refresh access token</td><td>Refresh token</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/auth/logout</td><td class="t-desc">Invalidate refresh token</td><td>Bearer</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/auth/forgot-password</td><td class="t-desc">Send password reset email</td><td>—</td></tr>
+  </tbody>
+</table></div>
+
+<h4>Product Catalog</h4>
+<div style="overflow-x:auto"><table class="compare-table">
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/products</td><td class="t-desc">List products (paginated, filterable, sortable)</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/products/{productId}</td><td class="t-desc">Get product detail with variants &amp; images</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/products/{productId}/reviews</td><td class="t-desc">Get product reviews (paginated)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/products/{productId}/reviews</td><td class="t-desc">Create review (must have purchased)</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/categories</td><td class="t-desc">List category tree</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/search</td><td class="t-desc">Full-text search across products</td></tr>
+  </tbody>
+</table></div>
+
+<h4>Cart &amp; Orders</h4>
+<div style="overflow-x:auto"><table class="compare-table">
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/cart</td><td class="t-desc">Get cart with items, prices, totals</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/cart/items</td><td class="t-desc">Add item (variantId + quantity)</td></tr>
+    <tr><td><span class="badge badge-patch">PATCH</span></td><td class="t-url">/cart/items/{itemId}</td><td class="t-desc">Update quantity</td></tr>
+    <tr><td><span class="badge badge-delete">DELETE</span></td><td class="t-url">/cart/items/{itemId}</td><td class="t-desc">Remove item</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/orders</td><td class="t-desc">Create order from cart (checkout)</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/orders/{orderId}</td><td class="t-desc">Order detail with items, payment, shipment</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/orders/{orderId}/cancel</td><td class="t-desc">Cancel order (if cancellable)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/orders/{orderId}/payment</td><td class="t-desc">Initiate Stripe PaymentIntent</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/webhooks/stripe</td><td class="t-desc">Stripe webhook receiver</td></tr>
+  </tbody>
+</table></div>
+
+<h3>Checkout Data Flow</h3>
+<pre><span class="c-method">STEP 1</span>  POST /cart/items          → Redis updates cart session
+<span class="c-method">STEP 2</span>  GET /cart                 → re-validates stock, returns totals
+<span class="c-method">STEP 3</span>  POST /orders              → re-validates items, creates Order (PENDING_PAYMENT),
+                                  reserves inventory, creates Stripe PaymentIntent
+                                  → returns {orderId, paymentIntentClientSecret}
+<span class="c-method">STEP 4</span>  Stripe.js payment form    → user enters card, Stripe handles 3DS
+<span class="c-method">STEP 5</span>  POST /webhooks/stripe     → verify signature, update Order → PAID,
+                                  deduct inventory, queue confirmation email
+<span class="c-method">STEP 6</span>  GET /orders/{orderId}     → {status: "PROCESSING", trackingNumber}</pre>
+
+<h3>Order State Machine</h3>
+<pre><span class="c-status">PENDING_PAYMENT</span>  →  <span class="c-status">PAID</span>           (webhook)  |  <span class="c-status">CANCELLED</span>    (payment fail)
+<span class="c-status">PAID</span>             →  <span class="c-status">PROCESSING</span>     (vendor)   |  <span class="c-status">REFUNDED</span>     (full refund)
+<span class="c-status">PROCESSING</span>       →  <span class="c-status">SHIPPED</span>        (tracking) |  <span class="c-status">CANCELLED</span>    (vendor cancels)
+<span class="c-status">SHIPPED</span>          →  <span class="c-status">DELIVERED</span>      (tracking)
+<span class="c-status">DELIVERED</span>        →  <span class="c-status">COMPLETED</span>      (7 days)   |  <span class="c-status">RETURN_REQUESTED</span></pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Project 2 — Real-Time Chat API</h2>
+
+<div class="project-hero" style="background: linear-gradient(135deg, var(--bg2) 0%, rgba(74,222,128,0.06) 100%);">
+  <div class="project-tag" style="color:var(--green);border-color:rgba(74,222,128,0.3)">💬 Project 2 — Backend</div>
+  <h3>Real-Time Chat Application API</h3>
+  <p>A scalable chat API with channels, direct messages, threads, reactions, file attachments, and presence. Covers WebSocket integration patterns and REST/WebSocket hybrid architecture.</p>
+  <div class="tech-stack">
+    <span class="tech-pill">Node.js</span><span class="tech-pill">PostgreSQL</span>
+    <span class="tech-pill">Redis Pub/Sub</span><span class="tech-pill">WebSocket</span>
+    <span class="tech-pill">S3 File Storage</span>
+  </div>
+</div>
+
+<h3>REST vs WebSocket — When to Use Each</h3>
+<div class="flow-diagram">REST API handles (durable operations):
+  ├── Authentication & token refresh
+  ├── Loading message history (GET /channels/{id}/messages)
+  ├── Creating/editing/deleting messages
+  ├── Channel/workspace management
+  ├── File uploads & search
+  └── Any operation where you need a response status code
+
+WebSocket handles (real-time events):
+  ├── New message received           message.new
+  ├── Message edited / deleted       message.updated | message.deleted
+  ├── User typing indicator          user.typing.start | user.typing.stop
+  ├── Presence                       user.presence.changed
+  ├── Reaction added/removed         reaction.added | reaction.removed
+  └── Member joined/left channel     channel.member.join | channel.member.leave</div>
+
+<h4>Core Endpoints</h4>
+<div style="overflow-x:auto"><table class="compare-table">
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/workspaces/{wId}/channels</td><td class="t-desc">List channels (user is member of)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/workspaces/{wId}/channels</td><td class="t-desc">Create channel (public/private)</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/channels/{id}/messages</td><td class="t-desc">Get message history (cursor paginated)</td></tr>
+    <tr><td><span class="badge badge-patch">PATCH</span></td><td class="t-url">/messages/{messageId}</td><td class="t-desc">Edit message (own messages only)</td></tr>
+    <tr><td><span class="badge badge-delete">DELETE</span></td><td class="t-url">/messages/{messageId}</td><td class="t-desc">Delete message (soft delete)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/messages/{messageId}/reactions</td><td class="t-desc">Add emoji reaction</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/messages/{messageId}/thread</td><td class="t-desc">Get thread replies</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/messages/{messageId}/thread</td><td class="t-desc">Reply in thread</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/dms</td><td class="t-desc">List DM conversations</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/dms/{dmId}/messages</td><td class="t-desc">Send direct message</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/files/upload</td><td class="t-desc">Get presigned S3 URL for upload</td></tr>
+  </tbody>
+</table></div>
+
+<pre><span class="c-comment"># WebSocket event protocol (consistent across all events)</span>
+{
+  <span class="c-field">"type"</span>:      <span class="c-str">"message.new"</span>,
+  <span class="c-field">"channelId"</span>: <span class="c-str">"ch_123"</span>,
+  <span class="c-field">"payload"</span>: {
+    <span class="c-field">"id"</span>:        <span class="c-str">"msg_789"</span>,
+    <span class="c-field">"content"</span>:   <span class="c-str">"Hello team!"</span>,
+    <span class="c-field">"sender"</span>:    {<span class="c-field">"id"</span>: <span class="c-str">"usr_456"</span>, <span class="c-field">"name"</span>: <span class="c-str">"Alice"</span>},
+    <span class="c-field">"timestamp"</span>: <span class="c-str">"2024-01-20T15:30:00Z"</span>
+  }
+}</pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Project 3 — Multi-Tenant SaaS Platform</h2>
+
+<div class="project-hero" style="background: linear-gradient(135deg, var(--bg2) 0%, rgba(196,169,107,0.06) 100%);">
+  <div class="project-tag">🚀 Project 3 — Full Stack</div>
+  <h3>Multi-Tenant SaaS Project Management Platform</h3>
+  <p>A complete Jira/Asana-style SaaS API. Organizations, teams, projects, tasks, sprints, time tracking, roles, and a public webhook API. Full stack with React frontend integration.</p>
+  <div class="tech-stack">
+    <span class="tech-pill">Node.js/Fastify</span><span class="tech-pill">PostgreSQL</span>
+    <span class="tech-pill">Redis</span><span class="tech-pill">JWT + OAuth2</span>
+    <span class="tech-pill">OpenAPI 3.1</span><span class="tech-pill">Webhooks</span>
+    <span class="tech-pill">Multi-Tenant</span>
+  </div>
+</div>
+
+<h3>Multi-Tenant Architecture</h3>
+<pre><span class="c-comment">Every resource is scoped to an Organization (tenant):</span>
+<span class="c-url">/orgs/{orgId}/projects</span>
+<span class="c-url">/orgs/{orgId}/projects/{projId}/tasks</span>
+
+<span class="c-comment">JWT carries orgId for fast authorization — no DB lookup needed:</span>
+{
+  <span class="c-field">"sub"</span>:         <span class="c-str">"usr_123"</span>,
+  <span class="c-field">"orgId"</span>:       <span class="c-str">"org_456"</span>,
+  <span class="c-field">"orgRole"</span>:     <span class="c-str">"ADMIN"</span>,
+  <span class="c-field">"permissions"</span>: [<span class="c-str">"projects:write"</span>, <span class="c-str">"members:manage"</span>]
+}</pre>
+
+<h4>Tasks (Core Resource)</h4>
+<div style="overflow-x:auto"><table class="compare-table">
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/projects/{pId}/tasks</td><td class="t-desc">List tasks — filter by status, assignee, sprint, label</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/projects/{pId}/tasks</td><td class="t-desc">Create task</td></tr>
+    <tr><td><span class="badge badge-patch">PATCH</span></td><td class="t-url">/tasks/{taskId}</td><td class="t-desc">Update any field (status, assignee, priority...)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/tasks/{taskId}/assignees</td><td class="t-desc">Add assignee</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/tasks/{taskId}/subtasks</td><td class="t-desc">Create subtask</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/tasks/{taskId}/comments</td><td class="t-desc">Add comment (supports @mentions)</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/tasks/{taskId}/time-entries</td><td class="t-desc">Log time spent</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td class="t-url">/tasks/{taskId}/activity</td><td class="t-desc">Full audit trail of all changes</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td class="t-url">/tasks/bulk-update</td><td class="t-desc">Update multiple tasks at once</td></tr>
+  </tbody>
+</table></div>
+
+<h3>Full Stack Data Flow — Kanban Board</h3>
+<pre><span class="c-method">USER OPENS BOARD</span>
+
+1. React makes parallel requests:
+   GET <span class="c-url">/projects/{id}</span>                                   ← project meta
+   GET <span class="c-url">/projects/{id}/sprints?status=ACTIVE</span>             ← active sprint
+   GET <span class="c-url">/projects/{id}/tasks?sprint={sId}&amp;fields=id,title,status,assignees</span>
+
+2. Server processes GET /tasks:
+   a. Validate JWT → extract orgId, userId
+   b. Check user has project access (Redis cache)
+   c. Query PostgreSQL with indexes on (project_id, sprint_id, status)
+   d. Serialize: map DB rows → API schema (exclude internal fields)
+   e. Return Cache-Control: private, max-age=30
+
+3. React renders Kanban board, groups tasks by status column
+
+<span class="c-method">USER DRAGS TASK TO DIFFERENT COLUMN</span>
+
+1. Optimistic UI update (move card instantly in React state)
+2. PATCH <span class="c-url">/tasks/{taskId}</span>  {<span class="c-field">"status"</span>: <span class="c-str">"IN_REVIEW"</span>}
+
+3. Server processes:
+   a. Validate JWT + task ownership/permission
+   b. Validate state transition (TODO → IN_PROGRESS → IN_REVIEW → DONE)
+   c. UPDATE tasks SET status='IN_REVIEW', updated_at=NOW()
+   d. INSERT INTO task_activity (change log)
+   e. Publish to Redis: {event: "task.status.changed", taskId}
+   f. Return 200 with updated task
+
+4. WebSocket server picks up Redis event →
+   Broadcasts to all connected users in this project
+5. Other team members' boards update in real-time
+6. If PATCH fails → React rolls back optimistic update, shows toast error</pre>
+
+<h3>Webhook System</h3>
+<pre><span class="c-comment"># Events fired:</span>
+task.created   task.updated   task.status.changed   task.comment.added
+sprint.started sprint.completed project.created      member.invited
+
+<span class="c-comment"># Payload (consistent format across all events):</span>
+{
+  <span class="c-field">"id"</span>:        <span class="c-str">"evt_01HX7K..."</span>,
+  <span class="c-field">"type"</span>:      <span class="c-str">"task.status.changed"</span>,
+  <span class="c-field">"timestamp"</span>: <span class="c-str">"2024-01-20T15:30:00Z"</span>,
+  <span class="c-field">"data"</span>:      { <span class="c-field">"taskId"</span>: <span class="c-str">"task_789"</span>, <span class="c-field">"oldStatus"</span>: <span class="c-str">"TODO"</span>, <span class="c-field">"newStatus"</span>: <span class="c-str">"IN_PROGRESS"</span> }
+}
+
+<span class="c-comment"># Signed with HMAC-SHA256:</span>
+<span class="c-key">X-Webhook-Signature</span>: <span class="c-str">sha256=abc123...</span>
+
+<span class="c-comment"># Delivery: exponential backoff</span>
+<span class="c-comment"># immediate → +30s → +5min → +30min → +2hr → mark failed</span></pre>
+
+<div class="divider">· · ·</div>
+
+<h2>Senior Engineer Self-Assessment</h2>
+<p>Can you check every one of these? That's your graduation benchmark.</p>
+
+<div class="takeaway-grid">
+  <div class="takeaway-card"><div class="takeaway-num">01</div><div class="takeaway-text"><strong>Design first, code second.</strong> Write your OpenAPI spec before a single line of implementation.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">02</div><div class="takeaway-text"><strong>Status codes are the contract.</strong> Never 200 with error in body. HTTP codes exist for a reason.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">03</div><div class="takeaway-text"><strong>Idempotency matters.</strong> Know which operations are safe, which are idempotent. Design retries accordingly.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">04</div><div class="takeaway-text"><strong>Version proactively.</strong> Decide versioning strategy before shipping v1. Deprecation windows must be communicated months in advance.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">05</div><div class="takeaway-text"><strong>Security is not optional.</strong> BOLA checks, input validation, no excessive data exposure. Design with a threat model in mind.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">06</div><div class="takeaway-text"><strong>Errors are a product feature.</strong> Structured error codes, field-level validation details, and docs URLs make developers love you.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">07</div><div class="takeaway-text"><strong>Pagination from day one.</strong> No collection endpoint should ever return unbounded results. Cursor-based for anything at scale.</div></div>
+  <div class="takeaway-card"><div class="takeaway-num">08</div><div class="takeaway-text"><strong>Rate limit headers everywhere.</strong> Not just on 429s — proactive clients use these to self-throttle before hitting limits.</div></div>
+</div>
+
+<div class="callout callout-tip">
+  <div class="callout-label">🎯 The Secret of Senior Engineers</div>
+  <p>An hour of good API design prevents a week of refactoring. Every decision you make in your API design is a contract with your users. Write that contract carefully — because once published, you have to live with it.</p>
+</div>
+
+<div class="bl-tag-row">
+  <span class="bl-tag">System Design</span>
+  <span class="bl-tag">REST API</span>
+  <span class="bl-tag">HTTP</span>
+  <span class="bl-tag">Backend</span>
+  <span class="bl-tag">Authentication</span>
+  <span class="bl-tag">Security</span>
+  <span class="bl-tag">Caching</span>
+  <span class="bl-tag">Webhooks</span>
+  <span class="bl-tag">Interview Prep</span>
+</div>
+
+<div class="bl-post-footer">
+  <p>Questions? Reach me at <a href="mailto:navnathvarade09@gmail.com">navnathvarade09@gmail.com</a> or on <a href="https://x.com/navnath_tw" target="_blank">Twitter</a>.</p>
+</div>
+
+</div><!-- /bl-body -->
+</div><!-- /part-4 -->
+
+<script>
+window.blShowPart = function(n) {
+  document.querySelectorAll('.bl-part').forEach(function(p, i) {
+    p.classList.toggle('visible', i === n);
+  });
+  document.querySelectorAll('.bl-pill').forEach(function(p, i) {
+    p.classList.toggle('active', i === n);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Handle data-bl-part buttons (CTA "continue" buttons)
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-bl-part]');
+  if (!btn) return;
+  e.preventDefault();
+  var n = parseInt(btn.getAttribute('data-bl-part'), 10);
+  window.blShowPart(n);
+});
+</script>
