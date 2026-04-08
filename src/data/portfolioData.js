@@ -1,44 +1,45 @@
 // ─── SKILLS DATA ─────────────────────────────────────────────
 export const skills = {
   frontend: [
-    { icon: '⚛', name: 'React.js', level: 90 },
-    { icon: '🔷', name: 'TypeScript', level: 85 },
-    { icon: '🎨', name: 'Tailwind CSS / Bootstrap', level: 88 },
-    { icon: '📦', name: 'Vite / npm', level: 85 },
-    { icon: '🔄', name: 'Redux Toolkit', level: 80 },
-    { icon: '🌐', name: 'HTML5 / CSS3', level: 92 },
-    { icon: '🎨', name: 'Radix UI', level: 78 },
-    { icon: '📡', name: 'Axios / API Integration', level: 88 },
-    { icon: '🧩', name: 'Responsive Design', level: 90 },
+    { icon: "react", name: "React.js", level: 90 },
+    { icon: "typescript", name: "TypeScript", level: 85 },
+    { icon: "tailwind", name: "Tailwind CSS / Bootstrap", level: 88 },
+    { icon: "vite", name: "Vite / npm", level: 85 },
+    { icon: "redux", name: "Redux Toolkit", level: 80 },
+    { icon: "html", name: "HTML5 / CSS3", level: 92 },
+    { icon: "radix", name: "Radix UI", level: 78 },
+    { icon: "api", name: "Axios / API Integration", level: 88 },
+    { icon: "responsive", name: "Responsive Design", level: 90 },
   ],
+
   backend: [
-    { icon: '🟢', name: 'Node.js / Express.js', level: 92 },
-    { icon: '🐍', name: 'Python', level: 70 },
-    { icon: '🧠', name: 'REST APIs', level: 93 },
-    { icon: '🐘', name: 'PostgreSQL', level: 85 },
-    { icon: '🔴', name: 'Redis', level: 78 },
-    { icon: '📨', name: 'RabbitMQ', level: 76 },
-    { icon: '🔥', name: 'Firebase', level: 70 },
-    { icon: '🔐', name: 'JWT Authentication', level: 85 },
-    { icon: '⚡', name: 'Socket.IO', level: 75 },
-    { icon: '🤖', name: 'Generative AI (Gemini, Langchain)', level: 80 },
-    { icon: '🌍', name: 'CORS / HTTP / HTTPS', level: 85 },
+    { icon: "node", name: "Node.js / Express.js", level: 92 },
+    { icon: "python", name: "Python", level: 70 },
+    { icon: "api", name: "REST APIs", level: 93 },
+    { icon: "postgres", name: "PostgreSQL", level: 85 },
+    { icon: "redis", name: "Redis", level: 78 },
+    { icon: "auth", name: "JWT Authentication", level: 85 },
+    { icon: "rabbitmq", name: "RabbitMQ", level: 76 },
+    { icon: "firebase", name: "Firebase", level: 70 },
+    { icon: "socket", name: "Socket.IO", level: 75 },
   ],
+
   tools: [
-    { icon: '🐳', name: 'Docker', level: 65 },
-    { icon: '☁', name: 'AWS / Cloud Platforms', level: 75 },
-    { icon: '🚀', name: 'CI/CD', level: 84 },
-    { icon: '🌐', name: 'Vercel / Netlify / Heroku', level: 80 },
-    { icon: '🐙', name: 'Git / GitHub', level: 85 },
-    { icon: '📮', name: 'Postman', level: 90 },
-    { icon: '🧪', name: 'Jest', level: 75 },
-    { icon: '💻', name: 'VS Code / IntelliJ', level: 92 },
+    { icon: "docker", name: "Docker", level: 65 },
+    { icon: "aws", name: "AWS / Cloud Platforms", level: 75 },
+    { icon: "cicd", name: "CI/CD", level: 84 },
+    { icon: "deploy", name: "Vercel / Netlify / Heroku", level: 80 },
+    { icon: "git", name: "Git / GitHub", level: 85 },
+    { icon: "postman", name: "Postman", level: 90 },
+    { icon: "jest", name: "Jest", level: 75 },
+    { icon: "ide", name: "VS Code / IntelliJ", level: 92 },
   ],
+
   design: [
-    { icon: '🖌', name: 'Figma', level: 65 },
-    { icon: '🎯', name: 'UI/UX Principles', level: 75 },
-    { icon: '📐', name: 'Responsive UI Design', level: 88 },
-    { icon: '🧩', name: 'Component Design', level: 84 },
+    { icon: "figma", name: "Figma", level: 65 },
+    { icon: "ux", name: "UI/UX Principles", level: 75 },
+    { icon: "responsive", name: "Responsive UI Design", level: 88 },
+    { icon: "component", name: "Component Design", level: 84 },
   ],
 };
 
@@ -175,6 +176,15 @@ export const marqueeItems = [
 
 // ─── BLOG POSTS DATA ─────────────────────────────────────────
 export const blogPosts = [
+   {
+    slug: 'rest-api-design-masterclass',
+    title: 'REST API Design Masterclass: From Zero → Principal Engineer',
+    date: 'April 6, 2025',
+    excerpt: 'Everything you need to design, architect, and document production-grade REST APIs. 15 modules covering HTTP deep dives, authentication, versioning, security, and 3 complete real-world projects.',
+    tags: ['REST API', 'Backend', 'System Design'],
+    readTime: '60 min read',
+    featured: true,
+  },
   {
     slug: 'rate-limiting-blog-series',
     title: 'Rate Limiting Systems: From Basics to Planet-Scale',

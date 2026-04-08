@@ -99,8 +99,16 @@
 }
 
 .cardIcon {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   line-height: 1;
+  color: var(--accent);
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.card:hover .cardIcon {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 .cardName {
