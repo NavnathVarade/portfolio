@@ -65,6 +65,26 @@ export const projects = [
   },
   {
     num: '02',
+    title: 'Distributed Job Processing System',
+    desc: 'Production-grade distributed job orchestration platform handling millions of background jobs with priority queues, retries, circuit breakers, auto-scaling signals, and full observability.',
+    tags: [
+      'Node.js',
+      'TypeScript',
+      'Redis',
+      'PostgreSQL',
+      'Prisma',
+      'Docker',
+      'Prometheus',
+      'AWS'
+    ],
+    bg: 'linear-gradient(135deg,#0a0f14 0%,#0f1720 50%,#0a0f14 100%)',
+    accent: '#38bdf8',
+    status: 'live',
+    github: 'https://github.com/NavnathVarade/Distributed-Job-Processing-System',
+    live: 'https://github.com/NavnathVarade/Distributed-Job-Processing-System',
+  },
+  {
+    num: '03',
     title: 'PetNest',
     desc: 'AI-powered pet adoption platform with real-time chat, image detection, and secure authentication.',
     tags: ['React', 'TypeScript', 'Node.js', 'MongoDB', 'Socket.IO', 'Gen-AI'],
@@ -75,7 +95,7 @@ export const projects = [
     live: 'https://github.com/NavnathVarade/PetNest',
   },
   {
-    num: '03',
+    num: '04',
     title: 'Real-Time Chat Backend',
     desc: 'Secure backend for chat application with JWT auth, real-time messaging, and scalable architecture.',
     tags: ['Node.js', 'Express', 'MongoDB', 'Socket.IO', 'JWT'],
@@ -87,13 +107,13 @@ export const projects = [
   },
 
   // samp data
-  {
+  /* {
     num: '04', title: 'CraftOS',
     desc: 'Design system powering 12 SaaS products. 300+ components, full a11y, dark mode, and Figma sync.',
     tags: ['React', 'Storybook', 'Figma', 'Radix UI'],
     bg: 'linear-gradient(135deg,#0f0a0f 0%,#0f091a 50%,#0f0a0f 100%)',
     accent: '#c084fc', status: 'wip', github: '#', live: '#',
-  },
+  }, */
   {
     num: '05', title: 'Latency.io',
     desc: 'Global API performance monitoring with sub-10ms alert latency. Powers 3,000+ developer dashboards.',
